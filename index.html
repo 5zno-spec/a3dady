@@ -145,7 +145,7 @@ main{width:100%;max-width:560px}
 .grid .num:nth-child(6n){--b:#C9B3FF}
 .num[aria-pressed="true"]{background:var(--b);transform:scale(1.08);
   box-shadow:0 4px 0 var(--shadow),0 0 0 4px #fff,0 0 0 7px var(--ink)}
-.num[aria-pressed="true"]::after{content:"";position:absolute;top:-13px;inset-inline-end:-9px;width:28px;height:28px;border-radius:50%;background:#2BB98F url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5.5 12.5l4.2 4.2L18.5 7.8' fill='none' stroke='%23fff' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/72% no-repeat;border:3px solid var(--ink);box-shadow:0 2px 0 rgba(23,48,77,.35)}
+.num.done::after{content:"";position:absolute;top:-13px;inset-inline-end:-9px;width:28px;height:28px;border-radius:50%;background:#2BB98F url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5.5 12.5l4.2 4.2L18.5 7.8' fill='none' stroke='%23fff' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/72% no-repeat;border:3px solid var(--ink);box-shadow:0 2px 0 rgba(23,48,77,.35)}
 .choice:nth-child(3n+1){--b:#8FE3A8}
 .choice:nth-child(3n+2){--b:#FFC27A}
 .choice:nth-child(3n){--b:#9CCBFF}
@@ -185,7 +185,7 @@ main{flex:1;display:flex;flex-direction:column}
 .num{transition:background .2s,color .2s,transform .08s}
 .num[aria-pressed="true"]{transform:scale(1.08);box-shadow:0 2px 0 var(--shadow)}
 @media (hover:hover){.num:hover:not([aria-pressed="true"]){background:rgba(255,255,255,.85);color:var(--ink)}}
-.num[aria-pressed="true"]::after{top:-9px;width:18px;height:18px;border-width:2px;inset-inline-end:-6px}
+.num.done::after{top:-9px;width:18px;height:18px;border-width:2px;inset-inline-end:-6px}
 @media (max-width:380px){.num{font-size:1.35rem}}
 
 /* زر تغيير الشكل */
@@ -310,8 +310,9 @@ html{scrollbar-gutter:stable}
 /* شعار الصفحة الداخلية يعود إلى الواجهة الرئيسية */
 .logo button{display:block;background:none;border:0;padding:0;cursor:pointer;line-height:0}
 
-.tab:disabled{opacity:.4;filter:saturate(.5);cursor:default}
-.tab:disabled:active{transform:none}
+/* الرقم المحدد غير المكتمل أبيض، والمكتمل ملوّن وعليه علامة صح */
+.num[aria-pressed="true"]:not(.done){background:#fff}
+.num.done:not([aria-pressed="true"]){background:var(--b);color:var(--ink);border-color:var(--ink);box-shadow:0 2px 0 var(--shadow)}
 /* أزرار شكل الأرقام في الأعلى بجانب زر الصوت */
 .tabs{align-items:center}
 .tabs .digits{width:auto;max-width:none;padding:0;margin:0;gap:4px}
@@ -380,7 +381,7 @@ html{scrollbar-gutter:stable}
     </div>
     <div id="lock" class="stage result hidden"><svg class="frame" aria-hidden="true"><rect x="1.5" y="1.5" rx="22" ry="22"/></svg>
       <div class="word">تعلّم أولًا</div>
-      <div class="q">اختر رقمين على الأقل من صفحة الأعداد، ثم عُد لتلعب بهما</div>
+      <div class="q">أكمل لعبة رقمين على الأقل بزر ▶ في صفحة الأعداد، ثم عُد لتلعب بهما</div>
       <button class="btn" id="toLearn">إلى الأعداد</button>
     </div>
     <div id="result" class="stage result hidden"><svg class="frame" aria-hidden="true"><rect x="1.5" y="1.5" rx="22" ry="22"/></svg>
@@ -430,14 +431,14 @@ let store = {};
 try{ store = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }catch(e){ store = {}; }
 const okIdx = a => Array.isArray(a) && a.length === 11 && a.every(v => Number.isInteger(v) && v >= 0 && v < 5);
 const shapeIdx = okIdx(store.shapeIdx) ? store.shapeIdx.slice() : Array(11).fill(0);
-/* الأرقام التي درسها الطفل (فتحها في صفحة الأعداد): الألعاب لا تتجاوزها */
-const studied = new Set(Array.isArray(store.studied) ? store.studied.filter(n => Number.isInteger(n) && n >= 0 && n <= 10) : []);
+/* الأرقام التي درسها الطفل (أكمل لعبتها بزر ▶): لعبة «العب مع الأعداد» لا تتجاوزها */
+const studied = new Set(Array.isArray(store.learned) ? store.learned.filter(n => Number.isInteger(n) && n >= 0 && n <= 10) : []);
 let curTab = 'learn', score = 0, qi = 0, answer, locked = false, qEmoji, qList = [], pending = false, done = false;
 let best = Number.isInteger(store.best) ? store.best : 0;
 function persist(){
   try{
     localStorage.setItem(KEY, JSON.stringify({
-      cur, shapeIdx, muted, tab: curTab, best, studied: [...studied],
+      cur, shapeIdx, muted, tab: curTab, best, learned: [...studied],
       game: {score, qi, answer, emoji: qEmoji, list: qList, pending, done}
     }));
   }catch(e){}
@@ -522,7 +523,7 @@ function pick(n, quiet){
   renderShapes($('things'), SETS[n][shapeIdx[n]], n);
   updateShapeBtn();
   persist();
-  if(!quiet){ studied.add(n); updateMiniBtn(); persist(); tone([660]); speak(n); }
+  if(!quiet){ tone([660]); speak(n); }
 }
 function updateShapeBtn(){
   const b = $('shapeBtn');
@@ -618,7 +619,7 @@ function finish(){
   tone([523, 659, 784, 1047]);
 }
 $('again').onclick = startGame;
-$('toLearn').onclick = () => { history.replaceState({v: 'sec', tab: 'learn'}, ''); studied.add(cur); updateMiniBtn(); persist(); show('learn'); };
+$('toLearn').onclick = () => { history.replaceState({v: 'sec', tab: 'learn'}, ''); show('learn'); };
 
 /* خيار شكل الأرقام */
 function applyDigits(mode, save){
@@ -679,7 +680,7 @@ function nextMini(){
   $('mCount').textContent = fmt(mR) + ' من ' + fmt(MROUNDS);
   $('mQ').textContent = mN === 0 ? 'أين المربع الفارغ؟' : 'أين المجموعة التي فيها ' + NAMES[mN] + '؟';
   $('mMsg').textContent = '';
-  const list = [mN, ...pickOthers([...studied], mN, 2)].sort(() => Math.random() - .5);
+  const list = [mN, ...pickOthers([...Array(11).keys()], mN, 2)].sort(() => Math.random() - .5);
   $('mCards').style.gridTemplateColumns = 'repeat(' + list.length + ',1fr)';
   const emoji = SETS[mN][Math.floor(Math.random() * 5)];
   $('mCards').innerHTML = '';
@@ -706,11 +707,19 @@ function nextMini(){
 function finishMini(){
   $('mRound').classList.add('hidden'); $('mResult').classList.remove('hidden');
   $('mCount').textContent = '';
+  studied.add(mN); updateNums(); persist();
   tone([523, 659, 784, 1047]);
   $('mAgain').focus();
 }
-function updateMiniBtn(){ $('miniBtn').disabled = studied.size < 2; }
-updateMiniBtn();
+/* زر الرقم يتلوّن حين يُكمل الطفل لعبته */
+function updateNums(){
+  [...grid.children].forEach(b => {
+    const n = +b.dataset.n, d = studied.has(n);
+    b.classList.toggle('done', d);
+    b.setAttribute('aria-label', NAMES[n] + (d ? ' - تم' : ''));
+  });
+}
+updateNums();
 $('miniBtn').onclick = openMini;
 $('mClose').onclick = closeMini;
 $('mBack').onclick = closeMini;
@@ -727,11 +736,7 @@ setHome(true);
 
 /* زر الرجوع في الهاتف: من تعلّم أو العب يعود إلى الواجهة الرئيسية، ومن لعبة الرقم يغلقها أولًا */
 if(history.state) history.replaceState(null, '');
-function enter(tab){
-  history.pushState({v: 'sec', tab}, '');
-  if(tab === 'learn'){ studied.add(cur); updateMiniBtn(); persist(); }
-  show(tab); setHome(false);
-}
+function enter(tab){ history.pushState({v: 'sec', tab}, ''); show(tab); setHome(false); }
 $('hb1').onclick = () => enter('learn');
 $('hb4').onclick = () => enter('play');
 $('homeBtn').onclick = () => {
