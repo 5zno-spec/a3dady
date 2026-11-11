@@ -1,5 +1,5 @@
 /* يعمل التطبيق بلا إنترنت: تُخزَّن الملفات عند أول زيارة ثم تُقدَّم من الجهاز */
-const VERSION = 'v15';
+const VERSION = 'v16';
 const CACHE = 'arabic-numbers-' + VERSION;
 const CORE = [
   './', 'index.html', 'manifest.webmanifest',
