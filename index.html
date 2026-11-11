@@ -318,6 +318,24 @@ html{scrollbar-gutter:stable}
 .tabs{align-items:center}
 .tabs .digits{width:auto;max-width:none;padding:0;margin:0;gap:4px}
 .tabs .dg{box-sizing:border-box;height:41px;min-width:46px;padding:0 10px;font-size:1.1rem;line-height:1}
+
+/* نافذة تثبيت التطبيق: زجاجية، شعار وتحته زر التثبيت، وعلامة إغلاق */
+#install{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:20px;
+  background:rgba(23,48,77,.22);animation:insFade .3s ease both}
+.ins-card{position:relative;width:min(78vw,290px);padding:38px 22px 26px;display:flex;flex-direction:column;align-items:center;gap:22px;
+  border-radius:30px;background:linear-gradient(135deg,rgba(255,255,255,.62),rgba(255,255,255,.24));
+  -webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);
+  border:2px solid rgba(255,255,255,.85);
+  box-shadow:0 14px 36px rgba(23,48,77,.25),inset 0 1px 0 rgba(255,255,255,.95);
+  animation:insPop .5s cubic-bezier(.2,1.4,.4,1) both}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.ins-card{background:rgba(255,255,255,.92)}}
+.ins-card img{width:min(42vw,150px);height:auto;filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 16px rgba(255,255,255,.8))}
+#insBtn{background:linear-gradient(#5FDDB3,#2BB98F);color:#fff;gap:2px;padding:10px 30px}
+#insBtn .ic{width:1.4em;height:1.4em}
+.tab#insClose{position:absolute;top:10px;inset-inline-end:10px;width:38px;height:38px;padding:0;background:rgba(255,255,255,.75)}
+.tab#insClose .ic{margin:0;width:1.2em;height:1.2em}
+@keyframes insFade{from{opacity:0}to{opacity:1}}
+@keyframes insPop{from{transform:scale(.6) translateY(30px);opacity:0}to{transform:none;opacity:1}}
 </style>
 </head>
 <body>
@@ -412,6 +430,15 @@ html{scrollbar-gutter:stable}
       <div class="word">أحسنت!</div>
       <div class="m-btns"><button class="tab" id="mAgain">مرة أخرى</button><button class="tab" id="mBack">رجوع</button></div>
     </div>
+  </div>
+</div>
+
+<!-- نافذة تثبيت التطبيق -->
+<div id="install" class="hidden" role="dialog" aria-modal="true" aria-label="تثبيت التطبيق">
+  <div class="ins-card">
+    <button class="tab" id="insClose" aria-label="إغلاق"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M9 9l14 14M23 9L9 23"/></svg></button>
+    <img src="img/logo.webp" width="220" height="220" alt="أعدادي اللطيفة">
+    <button class="btn" id="insBtn"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 5v14M10 13.5l6 6 6-6M7 25h18"/></svg> تثبيت</button>
   </div>
 </div>
 
@@ -736,7 +763,11 @@ $('miniBtn').onclick = openMini;
 $('mClose').onclick = closeMini;
 $('mBack').onclick = closeMini;
 $('mAgain').onclick = openMini;
-document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('mini').classList.contains('hidden')) closeMini(); });
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Escape') return;
+  if(!$('install').classList.contains('hidden')) hideInstall();
+  else if(!$('mini').classList.contains('hidden')) closeMini();
+});
 
 /* الواجهة الرئيسية: تظهر بعد شاشة التحميل، والزر الأول فقط مفعّل حاليًا */
 function setHome(on){
@@ -779,6 +810,39 @@ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
 
+/* نافذة التثبيت: تظهر بعد ثانيتين من انتهاء شاشة التحميل،
+   فقط حين يسمح المتصفح بالتثبيت (أندرويد ومتصفحات الكمبيوتر) ولم يكن التطبيق مثبتًا */
+let installEvt = null, splashDone = false, insTimer = 0;
+const isInstalled = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+function scheduleInstall(){
+  clearTimeout(insTimer);
+  if(installEvt && splashDone && !isInstalled()) insTimer = setTimeout(showInstall, 2000);
+}
+function showInstall(){
+  if(!installEvt || isInstalled()) return;
+  $('install').classList.remove('hidden');
+  $('insBtn').focus();
+}
+function hideInstall(){
+  clearTimeout(insTimer);
+  $('install').classList.add('hidden');
+}
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();   // نمنع شريط المتصفح الافتراضي ونعرض نافذتنا
+  installEvt = e;
+  scheduleInstall();
+});
+$('insBtn').onclick = async () => {
+  const p = installEvt;
+  hideInstall();
+  if(!p) return;
+  installEvt = null;   // حدث التثبيت يُستخدم مرة واحدة
+  try{ await p.prompt(); await p.userChoice; }catch(e){}
+};
+$('insClose').onclick = hideInstall;
+$('install').onclick = e => { if(e.target === $('install')) hideInstall(); };
+window.addEventListener('appinstalled', () => { installEvt = null; hideInstall(); });
+
 /* الواجهة الرئيسية: شريط تقدم من اليمين خلال ٥ ثوانٍ */
 (function(){
   const sp = $('splash'), fill = $('spFill'), D = 5000, t0 = performance.now();
@@ -786,7 +850,7 @@ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
     const r = Math.min(1, ((t || performance.now()) - t0) / D);
     fill.style.width = (r * 100) + '%';
     if(r < 1) requestAnimationFrame(tick);
-    else { sp.classList.add('out'); setTimeout(() => sp.remove(), 650); }
+    else { sp.classList.add('out'); setTimeout(() => sp.remove(), 650); splashDone = true; scheduleInstall(); }
   })();
 })();
 </script>
