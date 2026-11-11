@@ -10,7 +10,7 @@
 <meta property="og:locale" content="ar_AR">
 <meta property="og:title" content="أعدادي اللطيفة – لعبة تعلّم الأرقام العربية">
 <meta property="og:description" content="لعبة ممتعة تعلّم الأطفال الأرقام العربية ٠ – ١٠ بالأشكال والأصوات.">
-<meta property="og:image" content="img/og-image.png">
+<meta property="og:image" content="https://5zno-spec.github.io/a3dady/img/og-image.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -18,7 +18,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="أعدادي اللطيفة – لعبة تعلّم الأرقام العربية">
 <meta name="twitter:description" content="لعبة ممتعة تعلّم الأطفال الأرقام العربية ٠ – ١٠ بالأشكال والأصوات.">
-<meta name="twitter:image" content="img/og-image.png">
+<meta name="twitter:image" content="https://5zno-spec.github.io/a3dady/img/og-image.png">
 <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <meta name="theme-color" content="#DDF1FF">
@@ -427,6 +427,8 @@ EMOJI.forEach(id => { new Image().src = 'img/shapes/' + id + '.webp'; });
 /* لكل رقم خمسة أشكال مختلفة للتعبير عنه (الخطوة 3 أولية مع 16 فلا يتكرر شكل داخل المجموعة) */
 const SETS = Array.from({length:11}, (_, n) => Array.from({length:5}, (_, k) => EMOJI[(n*5 + k*3 + 1) % EMOJI.length]));
 const $ = id => document.getElementById(id);
+/* خلط عادل (Fisher–Yates) حتى لا تميل الإجابة الصحيحة إلى موضع معيّن */
+const shuffle = a => { for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
 /* حفظ التقدم في المتصفح */
 const KEY = 'arabic-numbers-v1';
@@ -471,8 +473,11 @@ function speak(n){
   // يحاول أولًا تشغيل ملف مسجّل: audio/0.mp3 ... audio/10.mp3
   const a = new Audio('audio/' + n + '.mp3');
   current = a;
-  a.onerror = () => synth(NAMES[n]);
-  a.play().catch(() => synth(NAMES[n]));
+  // البديل (النطق الآلي) يعمل مرة واحدة فقط، ولآخر صوت طُلب فقط
+  let fell = false;
+  const fallback = () => { if(fell || current !== a) return; fell = true; synth(NAMES[n]); };
+  a.onerror = fallback;
+  a.play().catch(fallback);
 }
 function synth(text){
   try{
@@ -578,7 +583,7 @@ function nextQ(){
   const pool = playPool();
   answer = pool[Math.floor(Math.random() * pool.length)];
   const e = EMOJI[Math.floor(Math.random()*EMOJI.length)];
-  buildQ(e, [answer, ...pickOthers(pool, answer, 2)].sort(() => Math.random() - .5));
+  buildQ(e, shuffle([answer, ...pickOthers(pool, answer, 2)]));
   persist();
 }
 function buildQ(e, list){
@@ -662,11 +667,12 @@ applyDigits(saved);
 
 /* لعبة الرقم المحدد: اختر المجموعة التي فيها هذا العدد */
 const MROUNDS = 5;
-let mN = 0, mR = 0, mLock = false, mEmoji = [];
+let mN = 0, mR = 0, mLock = false, mEmoji = [], mTimer = 0;
 function openMini(){
+  clearTimeout(mTimer);   // إلغاء أي جولة مؤجلة من فتح سابق
   if(!(history.state && history.state.v === 'mini')) history.pushState({v: 'mini', tab: 'learn'}, '');
   mN = cur; mR = 0;
-  mEmoji = SETS[mN].slice().sort(() => Math.random() - .5);   // شكل مختلف لكل جولة دون تكرار
+  mEmoji = shuffle(SETS[mN].slice());   // شكل مختلف لكل جولة دون تكرار
   $('mNum').innerHTML = fmtH(mN);
   $('mResult').classList.add('hidden'); $('mRound').classList.remove('hidden');
   $('mini').classList.remove('hidden');
@@ -675,16 +681,18 @@ function openMini(){
   speak(mN);
 }
 function closeMini(){
+  clearTimeout(mTimer);
   if(history.state && history.state.v === 'mini') history.back();   // popstate يغلقها
   else { $('mini').classList.add('hidden'); $('miniBtn').focus(); }
 }
 function nextMini(){
+  if($('mini').classList.contains('hidden')) return;   // أُغلقت اللعبة قبل انتهاء المؤقت
   if(mR >= MROUNDS) return finishMini();
   mR++; mLock = false;
   $('mCount').textContent = fmt(mR) + ' من ' + fmt(MROUNDS);
   $('mQ').textContent = mN === 0 ? 'أين المربع الفارغ؟' : 'أين المجموعة التي فيها ' + NAMES[mN] + '؟';
   $('mMsg').textContent = '';
-  const list = [mN, ...pickOthers([...Array(11).keys()], mN, 2)].sort(() => Math.random() - .5);
+  const list = shuffle([mN, ...pickOthers([...Array(11).keys()], mN, 2)]);
   $('mCards').style.gridTemplateColumns = 'repeat(' + list.length + ',1fr)';
   const emoji = mEmoji[(mR - 1) % mEmoji.length];
   $('mCards').innerHTML = '';
@@ -699,7 +707,7 @@ function nextMini(){
         mLock = true; b.classList.add('ok'); tone([523, 659, 784]);
         $('mMsg').textContent = 'صحيح! ' + NAMES[mN];
         setTimeout(() => speak(mN), 500);
-        setTimeout(nextMini, 1500);
+        mTimer = setTimeout(nextMini, 1500);
       }else{
         b.classList.add('no'); b.disabled = true; tone([220]);
         $('mMsg').textContent = 'حاول مرة أخرى';
@@ -750,6 +758,7 @@ $('homeBtn').onclick = () => {
 window.addEventListener('popstate', e => {
   const st = e.state || {};
   if(st.v !== 'mini' && !$('mini').classList.contains('hidden')){
+    clearTimeout(mTimer);
     $('mini').classList.add('hidden');
     $('miniBtn').focus();
   }

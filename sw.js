@@ -1,5 +1,5 @@
 /* يعمل التطبيق بلا إنترنت: تُخزَّن الملفات عند أول زيارة ثم تُقدَّم من الجهاز */
-const VERSION = 'v26';
+const VERSION = 'v27';
 const CACHE = 'arabic-numbers-' + VERSION;
 const CORE = [
   './', 'index.html', 'manifest.webmanifest',
@@ -47,7 +47,8 @@ self.addEventListener('fetch', e => {
     const cache = await caches.open(CACHE);
     const cached = await cache.match(req, {ignoreSearch: sameOrigin, ignoreVary: true});
     const refresh = fetch(req).then(res => {
-      if(res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone());
+      /* لا نخزّن الاستجابات الجزئية (206) لأن cache.put يرفضها */
+      if(res && (res.status === 200 || res.type === 'opaque')) cache.put(req, res.clone()).catch(() => {});
       return res;
     });
     if(cached){
