@@ -97,6 +97,7 @@ main{width:100%;max-width:560px}
 .sg{width:90cqw;display:flex;flex-wrap:wrap;justify-content:center;align-content:center}
 .c{width:calc(100% / var(--c));height:calc(90cqw / var(--c));display:grid;place-items:center;
   font-size:calc(90cqw / var(--c) * .8);line-height:1}
+.c img{width:88%;height:88%;object-fit:contain;pointer-events:none;-webkit-user-drag:none;user-select:none}
 .none{font-size:15cqw;font-weight:800}
 .play{max-width:340px;margin:0 auto}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
@@ -420,9 +421,11 @@ let digits = 'ar';   // 'ar' = ٠١٢٣ ، 'en' = 0123
 const fmt = n => digits === 'ar' ? String(n).split('').map(d => AR[+d]).join('') : String(n);
 const fmtH = n => fmt(n);
 const NAMES = ['صفر','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة'];
-const EMOJI = ['🍎','⭐','🐟','🎈','🚗','🐥','🌸','🍪','🐶','🚀','🍓','🦋','🐢','🍌','🎁','🌈','🐱','🍩','⚽','🌻'];
-/* لكل رقم خمسة أشكال للتعبير عنه */
-const SETS = Array.from({length:11}, (_, n) => Array.from({length:5}, (_, k) => EMOJI[(n*3 + k*4 + 1) % EMOJI.length]));
+/* الأشكال صور في img/shapes (الاسم هو اسم الملف) */
+const EMOJI = ['seed','faucet','watering-can','shower','tree','house','rocket','backpack','net','gift','comb','candle','frog','key','fish','brush'];
+EMOJI.forEach(id => { new Image().src = 'img/shapes/' + id + '.webp'; });
+/* لكل رقم خمسة أشكال مختلفة للتعبير عنه (الخطوة 3 أولية مع 16 فلا يتكرر شكل داخل المجموعة) */
+const SETS = Array.from({length:11}, (_, n) => Array.from({length:5}, (_, k) => EMOJI[(n*5 + k*3 + 1) % EMOJI.length]));
 const $ = id => document.getElementById(id);
 
 /* حفظ التقدم في المتصفح */
@@ -499,10 +502,10 @@ function show(tab, resume){
 }
 
 /* الأشكال: تُرتَّب في شبكة تملأ المربع بأكبر حجم ممكن */
-function renderShapes(el, emoji, n){
+function renderShapes(el, id, n){
   if(n === 0){ el.innerHTML = ''; return; }
   el.style.setProperty('--c', Math.ceil(Math.sqrt(n)));
-  el.innerHTML = '<div class="sg">' + `<span class="c">${emoji}</span>`.repeat(n) + '</div>';
+  el.innerHTML = '<div class="sg">' + `<span class="c"><img src="img/shapes/${id}.webp" alt="" draggable="false"></span>`.repeat(n) + '</div>';
 }
 
 /* تعلّم */
