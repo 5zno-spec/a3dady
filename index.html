@@ -310,6 +310,8 @@ html{scrollbar-gutter:stable}
 /* شعار الصفحة الداخلية يعود إلى الواجهة الرئيسية */
 .logo button{display:block;background:none;border:0;padding:0;cursor:pointer;line-height:0}
 
+.tab:disabled{opacity:.4;filter:saturate(.5);cursor:default}
+.tab:disabled:active{transform:none}
 /* أزرار شكل الأرقام في الأعلى بجانب زر الصوت */
 .tabs{align-items:center}
 .tabs .digits{width:auto;max-width:none;padding:0;margin:0;gap:4px}
@@ -336,7 +338,7 @@ html{scrollbar-gutter:stable}
     <button class="btn hbtn h1b" id="hb1">الأعداد <span dir="ltr">(0 - 10)</span></button>
     <button class="btn hbtn h2b" disabled>الأعداد <span dir="ltr">(11 - 20)</span></button>
     <button class="btn hbtn h3b" disabled>الأعداد <span dir="ltr">(21 - 50)</span></button>
-    <button class="btn hbtn h4b" id="hb4">العب</button>
+    <button class="btn hbtn h4b" id="hb4">العب مع الأعداد</button>
   </nav>
 </div>
 <header class="top">
@@ -375,6 +377,11 @@ html{scrollbar-gutter:stable}
       <div class="q">كم عدد الأشكال؟</div>
       <div class="choices" id="choices"></div>
       <div class="msg" id="msg" aria-live="polite"></div>
+    </div>
+    <div id="lock" class="stage result hidden"><svg class="frame" aria-hidden="true"><rect x="1.5" y="1.5" rx="22" ry="22"/></svg>
+      <div class="word">تعلّم أولًا</div>
+      <div class="q">اختر رقمين على الأقل من صفحة الأعداد، ثم عُد لتلعب بهما</div>
+      <button class="btn" id="toLearn">إلى الأعداد</button>
     </div>
     <div id="result" class="stage result hidden"><svg class="frame" aria-hidden="true"><rect x="1.5" y="1.5" rx="22" ry="22"/></svg>
       <div class="word">أحسنت!</div>
@@ -423,12 +430,14 @@ let store = {};
 try{ store = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }catch(e){ store = {}; }
 const okIdx = a => Array.isArray(a) && a.length === 11 && a.every(v => Number.isInteger(v) && v >= 0 && v < 5);
 const shapeIdx = okIdx(store.shapeIdx) ? store.shapeIdx.slice() : Array(11).fill(0);
+/* الأرقام التي درسها الطفل (فتحها في صفحة الأعداد): الألعاب لا تتجاوزها */
+const studied = new Set(Array.isArray(store.studied) ? store.studied.filter(n => Number.isInteger(n) && n >= 0 && n <= 10) : []);
 let curTab = 'learn', score = 0, qi = 0, answer, locked = false, qEmoji, qList = [], pending = false, done = false;
 let best = Number.isInteger(store.best) ? store.best : 0;
 function persist(){
   try{
     localStorage.setItem(KEY, JSON.stringify({
-      cur, shapeIdx, muted, tab: curTab, best,
+      cur, shapeIdx, muted, tab: curTab, best, studied: [...studied],
       game: {score, qi, answer, emoji: qEmoji, list: qList, pending, done}
     }));
   }catch(e){}
@@ -513,7 +522,7 @@ function pick(n, quiet){
   renderShapes($('things'), SETS[n][shapeIdx[n]], n);
   updateShapeBtn();
   persist();
-  if(!quiet){ tone([660]); speak(n); }
+  if(!quiet){ studied.add(n); updateMiniBtn(); persist(); tone([660]); speak(n); }
 }
 function updateShapeBtn(){
   const b = $('shapeBtn');
@@ -533,6 +542,11 @@ pick(Number.isInteger(store.cur) && store.cur >= 0 && store.cur <= 10 ? store.cu
 const TOTAL = 10;
 function startGame(){
   score = 0; qi = 0; done = false; pending = false;
+  if(playPool().length < 2){
+    $('round').classList.add('hidden'); $('result').classList.add('hidden'); $('lock').classList.remove('hidden');
+    persist(); return;
+  }
+  $('lock').classList.add('hidden');
   $('round').classList.remove('hidden');
   $('result').classList.add('hidden');
   nextQ();
@@ -547,17 +561,20 @@ function updateFinal(){
   $('final').textContent = 'حصلت على ' + fmt(score) + ' من ' + fmt(TOTAL);
   $('best').textContent = 'أفضل نتيجة: ' + fmt(best) + ' من ' + fmt(TOTAL);
 }
+/* أرقام اللعب: المدروسة فقط من ١ إلى ١٠ */
+const playPool = () => [...studied].filter(n => n >= 1 && n <= 10);
+/* يختار أقرب الأرقام المدروسة للرقم المطلوب ليكون التمييز بينها ممتعًا */
+function pickOthers(pool, n, count){
+  return pool.filter(k => k !== n)
+    .map(k => ({k, w: Math.abs(k - n) + Math.random() * 2.5})).sort((a, b) => a.w - b.w).slice(0, count).map(o => o.k);
+}
 function nextQ(){
   if(qi >= TOTAL) return finish();
   qi++; pending = false;
-  answer = 1 + Math.floor(Math.random()*10);
+  const pool = playPool();
+  answer = pool[Math.floor(Math.random() * pool.length)];
   const e = EMOJI[Math.floor(Math.random()*EMOJI.length)];
-  const opts = new Set([answer]);
-  while(opts.size < 3){
-    const d = Math.max(1, Math.min(10, answer + Math.floor(Math.random()*5) - 2));
-    opts.add(d);
-  }
-  buildQ(e, [...opts].sort(() => Math.random() - .5));
+  buildQ(e, [answer, ...pickOthers(pool, answer, 2)].sort(() => Math.random() - .5));
   persist();
 }
 function buildQ(e, list){
@@ -566,6 +583,7 @@ function buildQ(e, list){
   updateBar();
   $('msg').textContent = '';
   $('choices').innerHTML = '';
+  $('choices').style.gridTemplateColumns = 'repeat(' + list.length + ',1fr)';
   list.forEach(n => {
     const b = document.createElement('button');
     b.className = 'choice'; b.dataset.n = n; b.innerHTML = fmtH(n);
@@ -600,6 +618,7 @@ function finish(){
   tone([523, 659, 784, 1047]);
 }
 $('again').onclick = startGame;
+$('toLearn').onclick = () => { history.replaceState({v: 'sec', tab: 'learn'}, ''); studied.add(cur); updateMiniBtn(); persist(); show('learn'); };
 
 /* خيار شكل الأرقام */
 function applyDigits(mode, save){
@@ -624,8 +643,8 @@ try{ saved = localStorage.getItem('digits') === 'en' ? 'en' : 'ar'; }catch(e){}
 (function restoreGame(){
   const g = store.game;
   if(!g || !Number.isInteger(g.qi) || g.qi < 1 || !Number.isInteger(g.score)) return;
-  const valid = Number.isInteger(g.answer) && Array.isArray(g.list) && g.list.length === 3 &&
-    g.list.every(n => Number.isInteger(n) && n >= 1 && n <= 10) && g.list.includes(g.answer) && EMOJI.includes(g.emoji);
+  const valid = Number.isInteger(g.answer) && Array.isArray(g.list) && (g.list.length === 2 || g.list.length === 3) &&
+    g.list.every(n => Number.isInteger(n) && n >= 1 && n <= 10 && studied.has(n)) && g.list.includes(g.answer) && EMOJI.includes(g.emoji);
   if(!g.done && !valid) return;
   score = g.score; qi = g.qi; answer = g.answer; done = !!g.done; pending = !!g.pending;
   if(done){
@@ -660,9 +679,8 @@ function nextMini(){
   $('mCount').textContent = fmt(mR) + ' من ' + fmt(MROUNDS);
   $('mQ').textContent = mN === 0 ? 'أين المربع الفارغ؟' : 'أين المجموعة التي فيها ' + NAMES[mN] + '؟';
   $('mMsg').textContent = '';
-  const d = [...Array(11).keys()].filter(k => k !== mN)
-    .map(k => ({k, w: Math.abs(k - mN) + Math.random() * 2.5})).sort((a, b) => a.w - b.w).slice(0, 2).map(o => o.k);
-  const list = [mN, ...d].sort(() => Math.random() - .5);
+  const list = [mN, ...pickOthers([...studied], mN, 2)].sort(() => Math.random() - .5);
+  $('mCards').style.gridTemplateColumns = 'repeat(' + list.length + ',1fr)';
   const emoji = SETS[mN][Math.floor(Math.random() * 5)];
   $('mCards').innerHTML = '';
   list.forEach(c => {
@@ -691,6 +709,8 @@ function finishMini(){
   tone([523, 659, 784, 1047]);
   $('mAgain').focus();
 }
+function updateMiniBtn(){ $('miniBtn').disabled = studied.size < 2; }
+updateMiniBtn();
 $('miniBtn').onclick = openMini;
 $('mClose').onclick = closeMini;
 $('mBack').onclick = closeMini;
@@ -707,7 +727,11 @@ setHome(true);
 
 /* زر الرجوع في الهاتف: من تعلّم أو العب يعود إلى الواجهة الرئيسية، ومن لعبة الرقم يغلقها أولًا */
 if(history.state) history.replaceState(null, '');
-function enter(tab){ history.pushState({v: 'sec', tab}, ''); show(tab); setHome(false); }
+function enter(tab){
+  history.pushState({v: 'sec', tab}, '');
+  if(tab === 'learn'){ studied.add(cur); updateMiniBtn(); persist(); }
+  show(tab); setHome(false);
+}
 $('hb1').onclick = () => enter('learn');
 $('hb4').onclick = () => enter('play');
 $('homeBtn').onclick = () => {
