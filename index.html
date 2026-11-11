@@ -319,21 +319,25 @@ html{scrollbar-gutter:stable}
 .tabs .digits{width:auto;max-width:none;padding:0;margin:0;gap:4px}
 .tabs .dg{box-sizing:border-box;height:41px;min-width:46px;padding:0 10px;font-size:1.1rem;line-height:1}
 
-/* نافذة تثبيت التطبيق: زجاجية، شعار وتحته زر التثبيت، وعلامة إغلاق */
+/* نافذة تثبيت التطبيق: زجاج مصنفر شبه معتم، وما خلفها مضبّب */
 #install{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:20px;
-  background:rgba(23,48,77,.22);animation:insFade .3s ease both}
-.ins-card{position:relative;width:min(78vw,290px);padding:38px 22px 26px;display:flex;flex-direction:column;align-items:center;gap:22px;
-  border-radius:30px;background:linear-gradient(135deg,rgba(255,255,255,.62),rgba(255,255,255,.24));
-  -webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);
-  border:2px solid rgba(255,255,255,.85);
-  box-shadow:0 14px 36px rgba(23,48,77,.25),inset 0 1px 0 rgba(255,255,255,.95);
+  background:rgba(23,48,77,.3);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  animation:insFade .3s ease both}
+.ins-card{position:relative;width:min(78vw,290px);padding:40px 22px 26px;display:flex;flex-direction:column;align-items:center;gap:22px;
+  border-radius:30px;background:linear-gradient(160deg,rgba(255,255,255,.93),rgba(236,248,255,.86));
+  -webkit-backdrop-filter:blur(24px) saturate(1.6);backdrop-filter:blur(24px) saturate(1.6);
+  border:1.5px solid rgba(255,255,255,.95);
+  box-shadow:0 18px 44px rgba(23,48,77,.28),inset 0 1px 0 #fff;
   animation:insPop .5s cubic-bezier(.2,1.4,.4,1) both}
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.ins-card{background:rgba(255,255,255,.92)}}
-.ins-card img{width:min(42vw,150px);height:auto;filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 16px rgba(255,255,255,.8))}
-#insBtn{background:linear-gradient(#5FDDB3,#2BB98F);color:#fff;gap:2px;padding:10px 30px}
-#insBtn .ic{width:1.4em;height:1.4em}
-.tab#insClose{position:absolute;top:10px;inset-inline-end:10px;width:38px;height:38px;padding:0;background:rgba(255,255,255,.75)}
-.tab#insClose .ic{margin:0;width:1.2em;height:1.2em}
+.ins-card img{width:min(42vw,150px);height:auto}
+/* زر التثبيت: كبسولة ناعمة بلا إطار داكن، بنفس أسلوب أزرار اللعبة */
+.tab#insBtn{background:linear-gradient(#6EE3BD,#2BB98F);color:#fff;font-size:1.15rem;padding:10px 28px;gap:6px;
+  box-shadow:0 6px 16px rgba(43,185,143,.4)}
+.tab#insBtn .ic{margin:0;width:1.25em;height:1.25em}
+.tab#insBtn:active{transform:scale(.96);box-shadow:0 3px 8px rgba(43,185,143,.35)}
+.tab#insClose{position:absolute;top:12px;inset-inline-end:12px;width:34px;height:34px;padding:0;background:rgba(23,48,77,.07);color:rgba(23,48,77,.7)}
+.tab#insClose::before{display:none}
+.tab#insClose .ic{margin:0;width:1.1em;height:1.1em}
 @keyframes insFade{from{opacity:0}to{opacity:1}}
 @keyframes insPop{from{transform:scale(.6) translateY(30px);opacity:0}to{transform:none;opacity:1}}
 </style>
@@ -438,7 +442,7 @@ html{scrollbar-gutter:stable}
   <div class="ins-card">
     <button class="tab" id="insClose" aria-label="إغلاق"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M9 9l14 14M23 9L9 23"/></svg></button>
     <img src="img/logo.webp" width="220" height="220" alt="أعدادي اللطيفة">
-    <button class="btn" id="insBtn"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 5v14M10 13.5l6 6 6-6M7 25h18"/></svg> تثبيت</button>
+    <button class="tab" id="insBtn"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 5v14M10 13.5l6 6 6-6M7 25h18"/></svg> تثبيت</button>
   </div>
 </div>
 
