@@ -659,10 +659,11 @@ applyDigits(saved);
 
 /* لعبة الرقم المحدد: اختر المجموعة التي فيها هذا العدد */
 const MROUNDS = 5;
-let mN = 0, mR = 0, mLock = false;
+let mN = 0, mR = 0, mLock = false, mEmoji = [];
 function openMini(){
   if(!(history.state && history.state.v === 'mini')) history.pushState({v: 'mini', tab: 'learn'}, '');
   mN = cur; mR = 0;
+  mEmoji = SETS[mN].slice().sort(() => Math.random() - .5);   // شكل مختلف لكل جولة دون تكرار
   $('mNum').innerHTML = fmtH(mN);
   $('mResult').classList.add('hidden'); $('mRound').classList.remove('hidden');
   $('mini').classList.remove('hidden');
@@ -682,7 +683,7 @@ function nextMini(){
   $('mMsg').textContent = '';
   const list = [mN, ...pickOthers([...Array(11).keys()], mN, 2)].sort(() => Math.random() - .5);
   $('mCards').style.gridTemplateColumns = 'repeat(' + list.length + ',1fr)';
-  const emoji = SETS[mN][Math.floor(Math.random() * 5)];
+  const emoji = mEmoji[(mR - 1) % mEmoji.length];
   $('mCards').innerHTML = '';
   list.forEach(c => {
     const b = document.createElement('button');
