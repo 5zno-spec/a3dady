@@ -286,6 +286,39 @@ html{scrollbar-gutter:stable}
 #rowP .stat{flex-wrap:nowrap;align-items:center;column-gap:4px}
 #rowP .stat:nth-child(2){flex:1.7}
 #rowP .stat .pbar{flex:1;min-width:0;height:6px;margin-top:0}
+
+/* الواجهة الرئيسية بعد التحميل: شعار يلمع وتحته الأقسام */
+#home{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;
+  padding:20px 18px;overflow:auto;
+  background:linear-gradient(180deg,#8FD3F8 0%,#BDE8FB 42%,#D5F2D0 72%,#8ED17C 100%)}
+.hl{position:relative;width:min(58vw,250px);flex:none}
+.hl img{display:block;width:100%;height:auto;animation:hGlow 2.6s ease-in-out infinite}
+@keyframes hGlow{
+  0%,100%{filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 14px rgba(255,255,255,.7));transform:scale(1)}
+  50%{filter:drop-shadow(0 0 10px #fff) drop-shadow(0 0 28px rgba(255,255,255,.95));transform:scale(1.04)}}
+/* بريق يمرّ فوق الشعار */
+.hl::after{content:"";position:absolute;inset:0;pointer-events:none;
+  -webkit-mask:url(img/logo.webp) center/contain no-repeat;mask:url(img/logo.webp) center/contain no-repeat;
+  background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.95) 50%,transparent 62%);
+  background-size:260% 100%;background-position:170% 0;animation:hSweep 3.2s ease-in-out infinite}
+@keyframes hSweep{0%,25%{background-position:170% 0}75%,100%{background-position:-70% 0}}
+.spark{position:absolute;color:#fff;font-size:1.5rem;line-height:1;text-shadow:0 0 8px #fff,0 0 16px #FFC83D;
+  opacity:0;animation:twinkle 2.4s ease-in-out infinite;pointer-events:none}
+.spark:nth-of-type(1){top:2%;inset-inline-start:2%}
+.spark:nth-of-type(2){top:14%;inset-inline-end:-4%;font-size:1.1rem;animation-delay:.8s}
+.spark:nth-of-type(3){bottom:6%;inset-inline-start:-6%;font-size:1.2rem;animation-delay:1.5s}
+.spark:nth-of-type(4){bottom:0;inset-inline-end:6%;animation-delay:.4s}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(.4) rotate(0)}50%{opacity:1;transform:scale(1.15) rotate(30deg)}}
+.hmenu{display:flex;flex-direction:column;gap:14px;width:min(80vw,320px)}
+.hbtn{width:100%;padding:12px 20px;font-size:1.3rem;white-space:nowrap;gap:.35em}
+.hbtn.h1b{background:linear-gradient(#5FDDB3,#2BB98F)}
+.hbtn.h2b{background:linear-gradient(#FFE27A,#FFC83D)}
+.hbtn.h3b{background:linear-gradient(#FF9E94,#FF6B5E)}
+.hbtn.h4b{background:linear-gradient(#B7D8FF,#8CBFFF)}
+.hbtn:disabled{opacity:.4;filter:saturate(.5);cursor:default}
+.hbtn:disabled:active{transform:none;box-shadow:0 4px 0 var(--shadow)}
+/* شعار الصفحة الداخلية يعود إلى الواجهة الرئيسية */
+.logo button{display:block;background:none;border:0;padding:0;cursor:pointer;line-height:0}
 </style>
 </head>
 <body>
@@ -299,8 +332,20 @@ html{scrollbar-gutter:stable}
   <div class="hill h1"></div>
   <div class="hill h2"></div>
 </div>
+<div id="home" role="dialog" aria-label="القائمة الرئيسية">
+  <div class="hl">
+    <img src="img/logo.webp" width="220" height="220" alt="أعدادي اللطيفة">
+    <span class="spark" aria-hidden="true">✦</span><span class="spark" aria-hidden="true">✦</span><span class="spark" aria-hidden="true">✦</span><span class="spark" aria-hidden="true">✦</span>
+  </div>
+  <nav class="hmenu">
+    <button class="btn hbtn h1b" id="hb1">الأعداد <span dir="ltr">(0 - 10)</span></button>
+    <button class="btn hbtn h2b" disabled>الأعداد <span dir="ltr">(11 - 20)</span></button>
+    <button class="btn hbtn h3b" disabled>الأعداد <span dir="ltr">(21 - 50)</span></button>
+    <button class="btn hbtn h4b" disabled>العب</button>
+  </nav>
+</div>
 <header class="top">
-<h1 class="logo"><img src="img/logo.webp" width="220" height="220" alt="أعدادي اللطيفة"></h1>
+<h1 class="logo"><button id="homeBtn" aria-label="الصفحة الرئيسية"><img src="img/logo.webp" width="220" height="220" alt="أعدادي اللطيفة"></button></h1>
 <div class="tabs" role="tablist">
   <button class="tab" role="tab" id="t-learn" aria-selected="true"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8.5c-2.6-2-6-2.6-10-2v16.5c4-.6 7.4 0 10 2 2.6-2 6-2.6 10-2V6.5c-4-.6-7.4 0-10 2zM16 8.5V25"/></svg>تعلّم</button>
   <button class="tab" role="tab" id="t-play" aria-selected="false"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4.5l3.5 7.2 7.9 1.1-5.7 5.6 1.4 7.9L16 22.5l-7.1 3.8 1.4-7.9-5.7-5.6 7.9-1.1z"/></svg>العب</button>
@@ -662,6 +707,16 @@ $('mClose').onclick = closeMini;
 $('mBack').onclick = closeMini;
 $('mAgain').onclick = openMini;
 document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('mini').classList.contains('hidden')) closeMini(); });
+
+/* الواجهة الرئيسية: تظهر بعد شاشة التحميل، والزر الأول فقط مفعّل حاليًا */
+function setHome(on){
+  $('home').classList.toggle('hidden', !on);
+  document.querySelector('header').inert = on;
+  document.querySelector('main').inert = on;
+}
+setHome(true);
+$('hb1').onclick = () => { setHome(false); $('t-learn').focus(); };
+$('homeBtn').onclick = () => { setHome(true); $('hb1').focus(); };
 
 /* العمل بلا إنترنت */
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
