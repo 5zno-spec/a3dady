@@ -243,12 +243,20 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 #splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;
   background:var(--scene);transition:opacity .6s}
 #splash.out{opacity:0;pointer-events:none}
-.sp-logo{width:min(62vw,280px);height:auto;filter:drop-shadow(0 0 8px #fff) drop-shadow(0 0 22px rgba(255,255,255,.9));
+/* will-change: يرسم المتصفح الشعار بظلّه مرة واحدة ثم يحرّكه على معالج الرسومات دون إعادة رسم */
+.sp-logo{width:min(62vw,280px);height:auto;will-change:transform;
+  filter:drop-shadow(0 0 8px #fff) drop-shadow(0 0 22px rgba(255,255,255,.9));
   animation:spPop .8s cubic-bezier(.2,1.4,.4,1) both,spFloat 2.2s ease-in-out .8s infinite}
-@keyframes spPop{from{transform:scale(.3) rotate(-12deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
-@keyframes spFloat{0%,100%{transform:translateY(0) scale(1) rotate(-2deg)}50%{transform:translateY(-14px) scale(1.07) rotate(2deg)}}
+@keyframes spPop{from{transform:scale(.3) rotate(-12deg);opacity:0}to{transform:none;opacity:1}}
+/* يبدأ الطفو من نفس الوضع الذي تنتهي عنده القفزة حتى لا يقفز الشعار فجأة */
+@keyframes spFloat{0%,100%{transform:none}50%{transform:translateY(-14px) scale(1.07) rotate(2deg)}}
 .sp-track{width:min(62vw,280px);height:14px;border-radius:999px;background:rgba(255,255,255,.65);overflow:hidden}
-.sp-fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#A78BFA,#7C3AED)}
+/* شريط التقدم ينزلق من اليمين بحركة CSS خلال ٥ ثوانٍ بدل تغيير العرض بالجافا سكربت في كل إطار */
+.sp-fill{width:100%;height:100%;border-radius:999px;background:linear-gradient(90deg,#A78BFA,#7C3AED);
+  transform:translateX(100%);will-change:transform;animation:spFill 5s linear forwards}
+@keyframes spFill{to{transform:none}}
+/* أثناء شاشة التحميل تتوقف حركات ما خلفها (السحب وبريق الشعار وتوهّجه) ليبقى الجهاز متفرغًا لحركة الشعار */
+.loading > :not(#splash),.loading > :not(#splash) *,.loading .hl::after,.loading .cloud::before,.loading .cloud::after{animation-play-state:paused!important}
 
 /* ===== الواجهة الرئيسية: شعار يلمع وتحته الأقسام ===== */
 #home{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;
@@ -305,8 +313,8 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
-<body>
-<div id="splash" aria-label="جارٍ التحميل"><img class="sp-logo" src="img/logo.webp" width="220" height="220" alt="أعدادي اللطيفة"><div class="sp-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div class="sp-fill" id="spFill"></div></div></div>
+<body class="loading">
+<div id="splash" aria-label="جارٍ التحميل"><img class="sp-logo" src="img/logo.webp" width="220" height="220" alt="أعدادي اللطيفة" fetchpriority="high" decoding="sync"><div class="sp-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div class="sp-fill"></div></div></div>
 <div class="sky" aria-hidden="true">
   <div class="cloud" style="--t:6%;--w:180px;--x:5vw;--d:70s;--o:-12s"></div>
   <div class="cloud" style="--t:18%;--w:120px;--x:55vw;--d:95s;--o:-60s"></div>
@@ -810,16 +818,15 @@ $('insClose').onclick = hideInstall;
 $('install').onclick = e => { if(e.target === $('install')) hideInstall(); };
 window.addEventListener('appinstalled', () => { installEvt = null; hideInstall(); });
 
-/* الواجهة الرئيسية: شريط تقدم من اليمين خلال ٥ ثوانٍ */
-(function(){
-  const sp = $('splash'), fill = $('spFill'), D = 5000, t0 = performance.now();
-  (function tick(t){
-    const r = Math.min(1, ((t || performance.now()) - t0) / D);
-    fill.style.width = (r * 100) + '%';
-    if(r < 1) requestAnimationFrame(tick);
-    else { sp.classList.add('out'); setTimeout(() => sp.remove(), 650); splashDone = true; scheduleInstall(); }
-  })();
-})();
+/* شاشة التحميل: تختفي بعد ٥ ثوانٍ (شريط التقدم تحرّكه CSS)، ثم تُستأنف حركات الصفحة */
+setTimeout(() => {
+  const sp = $('splash');
+  sp.classList.add('out');
+  document.body.classList.remove('loading');
+  setTimeout(() => sp.remove(), 650);
+  splashDone = true;
+  scheduleInstall();
+}, 5000);
 </script>
 </body>
 </html>
