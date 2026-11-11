@@ -267,13 +267,8 @@ html{scrollbar-gutter:stable}
 
 /* صف علوي: شكل الأرقام بجانب مربعات الأرقام (تعلّم) وبجانب النقاط والسؤال (العب) */
 .toprow{display:flex;gap:8px;align-items:stretch;margin:0 0 14px}
-.toprow .digits{width:auto;flex:none;flex-direction:column;justify-content:center;gap:6px;padding:0;margin:0}
-.toprow .digits .tab{box-sizing:border-box;height:36px;min-width:44px;padding:0 8px;font-size:.95rem;line-height:1}
 .toprow .stats{flex:1;margin:0}
-#rowL{align-items:center;margin:0 0 8px}
-#rowL .digits{flex-direction:row;justify-content:flex-start;gap:4px}
 #rowP{align-items:stretch;gap:6px}
-#rowP .digits{flex-direction:row;gap:4px;align-items:stretch}
 #rowP .stats{gap:6px}
 #rowP .stat{padding:3px 9px;border-radius:10px;align-content:center}
 #rowP .stat b{font-family:'Tajawal','Cairo',sans-serif;font-weight:700;font-size:1.05rem}
@@ -314,6 +309,11 @@ html{scrollbar-gutter:stable}
 .hbtn:disabled:active{transform:none;box-shadow:0 4px 0 var(--shadow)}
 /* شعار الصفحة الداخلية يعود إلى الواجهة الرئيسية */
 .logo button{display:block;background:none;border:0;padding:0;cursor:pointer;line-height:0}
+
+/* أزرار شكل الأرقام في الأعلى بجانب زر الصوت */
+.tabs{align-items:center}
+.tabs .digits{width:auto;max-width:none;padding:0;margin:0;gap:4px}
+.tabs .dg{box-sizing:border-box;height:41px;min-width:46px;padding:0 10px;font-size:1.1rem;line-height:1}
 </style>
 </head>
 <body>
@@ -342,6 +342,10 @@ html{scrollbar-gutter:stable}
 <header class="top">
 <h1 class="logo"><button id="homeBtn" aria-label="الصفحة الرئيسية"><img src="img/logo.webp" width="220" height="220" alt="أعدادي اللطيفة"></button></h1>
 <div class="tabs">
+  <div class="digits" id="digits" role="group" aria-label="شكل الأرقام">
+  <button class="tab dg" id="d-ar" aria-pressed="true">١٢٣</button>
+  <button class="tab dg" id="d-en" aria-pressed="false">123</button>
+</div>
   <button class="tab" id="mute" aria-label="كتم الصوت" aria-pressed="false"><svg class="ic ic-lg" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 12.5h4.5l6-5v17l-6-5H5.5z"/><path d="M21 12.2c1.9 2.3 1.9 5.3 0 7.6M24.4 9.2c3.5 4 3.5 9.6 0 13.6"/></svg></button>
 </div>
 </header>
@@ -349,12 +353,6 @@ html{scrollbar-gutter:stable}
 <main>
   <!-- تعلّم -->
   <section id="learn">
-    <div class="toprow" id="rowL">
-<div class="digits" id="digits" role="group" aria-label="شكل الأرقام">
-  <button class="tab dg" id="d-ar" aria-pressed="true">١٢٣</button>
-  <button class="tab dg" id="d-en" aria-pressed="false">123</button>
-</div>
-        </div>
     <div class="stage split" aria-live="polite">
       <svg class="frame" aria-hidden="true"><rect x="1.5" y="1.5" rx="22" ry="22"/></svg>
       <div class="half numhalf">
@@ -486,7 +484,6 @@ function show(tab, resume){
   const learn = tab === 'learn';
   $('learn').classList.toggle('hidden', !learn);
   $('play').classList.toggle('hidden', learn);
-  $(learn ? 'rowL' : 'rowP').prepend($('digits'));
   if(!learn && (qi === 0 || (done && !resume))) startGame();
   persist();
 }
