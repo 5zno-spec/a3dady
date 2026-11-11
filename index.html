@@ -644,6 +644,7 @@ applyDigits(saved);
 const MROUNDS = 5;
 let mN = 0, mR = 0, mLock = false;
 function openMini(){
+  if(!(history.state && history.state.v === 'mini')) history.pushState({v: 'mini', tab: 'learn'}, '');
   mN = cur; mR = 0;
   $('mNum').innerHTML = fmtH(mN);
   $('mResult').classList.add('hidden'); $('mRound').classList.remove('hidden');
@@ -652,7 +653,10 @@ function openMini(){
   $('mClose').focus();
   speak(mN);
 }
-function closeMini(){ $('mini').classList.add('hidden'); $('miniBtn').focus(); }
+function closeMini(){
+  if(history.state && history.state.v === 'mini') history.back();   // popstate يغلقها
+  else { $('mini').classList.add('hidden'); $('miniBtn').focus(); }
+}
 function nextMini(){
   if(mR >= MROUNDS) return finishMini();
   mR++; mLock = false;
@@ -703,9 +707,33 @@ function setHome(on){
   document.querySelector('main').inert = on;
 }
 setHome(true);
-$('hb1').onclick = () => { show('learn'); setHome(false); };
-$('hb4').onclick = () => { show('play'); setHome(false); };
-$('homeBtn').onclick = () => { setHome(true); $('hb1').focus(); };
+
+/* زر الرجوع في الهاتف: من تعلّم أو العب يعود إلى الواجهة الرئيسية، ومن لعبة الرقم يغلقها أولًا */
+if(history.state) history.replaceState(null, '');
+function enter(tab){ history.pushState({v: 'sec', tab}, ''); show(tab); setHome(false); }
+$('hb1').onclick = () => enter('learn');
+$('hb4').onclick = () => enter('play');
+$('homeBtn').onclick = () => {
+  if(history.state && history.state.v === 'sec') history.back();
+  else { setHome(true); $('hb1').focus(); }
+};
+window.addEventListener('popstate', e => {
+  const st = e.state || {};
+  if(st.v !== 'mini' && !$('mini').classList.contains('hidden')){
+    $('mini').classList.add('hidden');
+    $('miniBtn').focus();
+  }
+  if(st.v === 'mini' && $('mini').classList.contains('hidden')){
+    history.replaceState({v: 'sec', tab: st.tab}, '');   // تقدّم إلى لعبة مغلقة: نبقى في القسم
+    st.v = 'sec';
+  }
+  if(st.v === 'sec' || st.v === 'mini'){
+    if(!$('home').classList.contains('hidden')){ show(st.tab || 'learn'); setHome(false); }
+  }else{
+    setHome(true);
+    $('hb1').focus();
+  }
+});
 
 /* العمل بلا إنترنت */
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
