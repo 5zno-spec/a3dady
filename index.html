@@ -674,7 +674,7 @@ function speak(n, done){
   setTimeout(end, 8000);   // أمان: لا ننتظر أكثر من ٨ ثوانٍ
 }
 /* فقاعة الثناء: عبارة تُختار عشوائيًا، وصوتها (إن وُجد) في audio/praise/رقم-العبارة.mp3 */
-const PRAISE = ['أحسنت!', 'رائع!', 'ممتاز!', 'برافو!', 'عظيم!', 'شاطر!', 'يا بطل!', 'مذهل!'];
+const PRAISE = ['أحسنت!', 'ممتاز!', 'رائع!', 'ما شاء الله!', 'بارك الله فيك!'];   // الترتيب = audio/praise/1.mp3 … 5.mp3
 let lastPraise = -1, praiseTimer;
 function showPraise(){
   let i; do{ i = Math.floor(Math.random() * PRAISE.length); }while(i === lastPraise && PRAISE.length > 1);
