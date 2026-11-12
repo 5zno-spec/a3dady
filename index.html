@@ -180,18 +180,21 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .c{width:calc(100% / var(--c));height:calc(90cqw / var(--c));display:grid;place-items:center;
   font-size:calc(90cqw / var(--c) * .8);line-height:1}
 .c img{width:88%;height:88%;object-fit:contain;pointer-events:none;-webkit-user-drag:none;user-select:none}
-/* الأعداد فوق العشرة: شبكة من خلايا متساوية (عدد أعمدتها --g يحسبه الجافا سكربت).
-   بطاقة العشرة كبيرة تأخذ ١×٢ خلايا في العرض والارتفاع وتبدأ من اليمين،
-   والآحاد تُرصّ بجانبها ثم تحتها (dense يملأ الفراغات بجانب البطاقات) */
-.tg{--u:calc(90cqw / var(--g));width:90cqw;display:grid;grid-template-columns:repeat(var(--g),1fr);grid-auto-rows:var(--u);grid-auto-flow:row dense}
-.ten{grid-column:span 2;grid-row:span 2;margin:calc(var(--u) * .08);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--u) * .04);
-  background:linear-gradient(#FFE89A,#FFC83D);border:calc(var(--u) * .05) solid var(--ink);border-radius:calc(var(--u) * .3);
-  box-shadow:0 calc(var(--u) * .06) 0 rgba(23,48,77,.35)}
-.ten img{width:55%;height:50%;object-fit:contain}
-.ten b{font-family:'Lalezar','Cairo',sans-serif;font-weight:400;font-size:calc(var(--u) * .55);line-height:1.15;color:var(--ink)}
+/* الأعداد فوق العشرة:
+   بطاقات العشرات عمود واحد على اليسار (مرصوصة رأسيًا)، والآحاد على اليمين في أعمدة وصفوف.
+   المقاسات (--ch ارتفاع البطاقة، --cw عرضها، --us حجم شكل الآحاد، --oc عدد أعمدة الآحاد) يحسبها الجافا سكربت
+   لتكون أكبر ما يمكن داخل المربع */
+.tg{width:90cqw;height:90cqw;direction:ltr;display:flex;align-items:center;justify-content:center;gap:4cqw}
+.tcol{display:flex;flex-direction:column;gap:3cqw}
+.ten{position:relative;width:var(--cw);height:var(--ch);display:grid;place-items:center;
+  background:linear-gradient(#FFE89A,#FFC83D);border:.7cqw solid var(--ink);border-radius:calc(var(--ch) * .22);
+  box-shadow:0 .8cqw 0 rgba(23,48,77,.35)}
+/* الرقم ١٠ في منتصف البطاقة، والشكل صغير في زاويتها العليا اليسرى */
+.ten b{font-family:'Lalezar','Cairo',sans-serif;font-weight:400;font-size:calc(var(--ch) * .62);line-height:1;color:var(--ink);padding-top:calc(var(--ch) * .1)}
+.ten img{position:absolute;top:7%;left:5%;width:calc(var(--ch) * .36);height:calc(var(--ch) * .36);object-fit:contain}
+.ocol{direction:rtl;display:grid;grid-template-columns:repeat(var(--oc),var(--us));grid-auto-rows:var(--us)}
 .one{display:grid;place-items:center}
-.one img{width:86%;height:86%;object-fit:contain}
+.one img{width:88%;height:88%;object-fit:contain}
 .ten img,.one img{pointer-events:none;-webkit-user-drag:none;user-select:none}
 
 /* ===== تعلّم: الرقم واسمه بجانب الأشكال، ومربعات الأرقام في الأسفل ===== */
@@ -764,16 +767,20 @@ function show(tab){
 
 /* الأشكال:
    حتى العشرة تُرتَّب في شبكة تملأ المربع.
-   فوق العشرة: كل عشرة بطاقة كبيرة عليها الشكل والرقم ١٠ تبدأ من اليمين،
-   والآحاد تُرصّ بجانبها ثم تحتها. tensCols يختار أقل عدد أعمدة يتسع فيه الكل
-   داخل المربع، فتكون العناصر أكبر ما يمكن (بطاقة العشرة = ٢×٢ من خلايا الآحاد) */
-function tensCols(t, o){
-  for(let g = 3; g <= 10; g++){
-    const k = Math.floor(g / 2), pairs = Math.ceil(t / k), free = pairs * 2 * g - 4 * t;
-    const rows = pairs * 2 + Math.ceil(Math.max(0, o - free) / g);
-    if(rows <= g) return g;
+   فوق العشرة: بطاقات العشرات في عمود واحد على اليسار، والآحاد على اليمين.
+   tensLayout يحسب المقاسات (بنسبة من عرض المربع) لتكون البطاقات والأشكال أكبر ما يمكن:
+   ارتفاع البطاقة يكفي لرصّ كل العشرات رأسيًا، وللآحاد يُختار عدد الأعمدة الذي يعطي أكبر شكل */
+function tensLayout(t, o){
+  const H = 88, gap = 3;
+  const ch = Math.min(26, (H - (t - 1) * gap) / t);
+  const cw = Math.min(ch * 1.55, 40);
+  const W = 90 - cw - 4;
+  let us = 0, oc = 1;
+  for(let c = 1; c <= o; c++){
+    const s = Math.min(W / c, H / Math.ceil(o / c), 24);
+    if(s > us){ us = s; oc = c; }
   }
-  return 10;
+  return {ch, cw, us, oc};
 }
 function renderShapes(el, id, n){
   if(n === 0){ el.innerHTML = ''; return; }
@@ -783,10 +790,10 @@ function renderShapes(el, id, n){
     el.innerHTML = '<div class="sg">' + `<span class="c">${img}</span>`.repeat(n) + '</div>';
     return;
   }
-  const t = Math.floor(n / 10), o = n % 10;
-  el.innerHTML = '<div class="tg" style="--g:' + tensCols(t, o) + '">' +
-    `<span class="ten">${img}<b>${fmt(10)}</b></span>`.repeat(t) +
-    `<span class="one">${img}</span>`.repeat(o) +
+  const t = Math.floor(n / 10), o = n % 10, L = tensLayout(t, o);
+  el.innerHTML = '<div class="tg" style="--ch:' + L.ch + 'cqw;--cw:' + L.cw + 'cqw;--us:' + L.us + 'cqw;--oc:' + L.oc + '">' +
+    '<div class="tcol">' + `<span class="ten">${img}<b>${fmt(10)}</b></span>`.repeat(t) + '</div>' +
+    (o ? '<div class="ocol">' + `<span class="one">${img}</span>`.repeat(o) + '</div>' : '') +
     '</div>';
 }
 
