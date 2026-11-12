@@ -121,10 +121,11 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .card:active{transform:translateY(4px);box-shadow:0 0 0 var(--shadow)}
 .card.done::after{content:"";position:absolute;top:-10px;inset-inline-end:-8px;width:28px;height:28px;border-radius:50%;
   background:var(--check);border:2px solid var(--ink);box-shadow:0 2px 0 rgba(23,48,77,.35)}
-/* أقسام العشرات: خمس بطاقات في الصف بأرقام أصغر قليلًا */
-.cards[data-sec="1"],.cards[data-sec="2"]{grid-template-columns:repeat(5,1fr);gap:10px}
-.cards[data-sec="1"] .card,.cards[data-sec="2"] .card{font-size:clamp(1.7rem,8.5vw,2.8rem);border-radius:18px}
-.cards[data-sec="1"] .card.done::after,.cards[data-sec="2"] .card.done::after{width:22px;height:22px;top:-8px;inset-inline-end:-6px}
+/* قسم ٢١–٥٠ (٣٠ بطاقة): خمس بطاقات في الصف بأرقام أصغر قليلًا.
+   قسما ٠–١٠ و١١–٢٠ بنفس الحجم: ثلاث بطاقات كبيرة في الصف */
+.cards[data-sec="2"]{grid-template-columns:repeat(5,1fr);gap:10px}
+.cards[data-sec="2"] .card{font-size:clamp(1.7rem,8.5vw,2.8rem);border-radius:18px}
+.cards[data-sec="2"] .card.done::after{width:22px;height:22px;top:-8px;inset-inline-end:-6px}
 
 /* ===== إنجازاتي: شريط التقدم العام ثم صف لكل رقم بدرجته ===== */
 .ach-top{background:rgba(255,255,255,.82);border-radius:22px;padding:14px 16px 14px;margin:0 4px 14px;box-shadow:0 6px 18px rgba(23,48,77,.12)}
