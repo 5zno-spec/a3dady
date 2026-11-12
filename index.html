@@ -293,18 +293,30 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .m-btns{display:flex;gap:10px;margin-top:6px}
 #mAgain{background:linear-gradient(#5FDDB3,#2BB98F);color:#fff;padding:10px 26px}
 #mBack{background:#fff;padding:10px 26px}
+/* على الهاتف: مربعان في الصف الأول والثالث في المنتصف تحتهما، فتكبر المربعات والأشكال بدل ثلاثة صغيرة متجاورة */
+@media (max-width:600px){
+  .m-in{gap:10px}
+  .m-num{font-size:4.6rem;line-height:1.3}
+  .m-q{font-size:1.25rem}
+  .m-cards{grid-template-columns:repeat(2,1fr);gap:12px}
+  .m-cards .mcard:last-child:nth-child(odd){grid-column:1 / -1;justify-self:center;width:calc(50% - 6px)}
+  #mini .msg{margin-top:4px}
+}
 
 /* ===== نافذة «هل أتممت دراسة الرقم؟» ===== */
 #ask{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:20px;
   background:rgba(23,48,77,.3);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   animation:insFade .25s ease both}
-.ask-card{position:relative;width:min(84vw,320px);padding:44px 22px 26px;display:flex;flex-direction:column;align-items:center;gap:20px;
+.ask-card{position:relative;width:min(84vw,320px);padding:44px 22px 18px;display:flex;flex-direction:column;align-items:center;gap:20px;
   border-radius:28px;background:#fff;box-shadow:0 18px 44px rgba(23,48,77,.28);text-align:center;
   animation:insPop .45s cubic-bezier(.2,1.4,.4,1) both}
 .ask-q{font-size:1.35rem;font-weight:800;line-height:1.7}
 .ask-q b{font-family:'Lalezar','Cairo',sans-serif;font-weight:400;font-size:1.7em;color:var(--coral);vertical-align:-.12em}
 .tab#askTest{background:linear-gradient(#6EE3BD,#2BB98F);color:#fff;padding:10px 28px;box-shadow:0 6px 16px rgba(43,185,143,.4)}
 .tab#askTest:active{transform:scale(.96);box-shadow:0 3px 8px rgba(43,185,143,.35)}
+/* «ليس الآن»: زر نصي هادئ تحت الزر الأخضر */
+.tab#askSkip{background:none;color:rgba(23,48,77,.6);font-size:1rem;padding:6px 18px;margin-top:-12px}
+.tab#askSkip::before{display:none}
 
 /* ===== شاشة التحميل ===== */
 #splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;
@@ -502,6 +514,7 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
     <button class="tab" id="askClose" aria-label="إغلاق"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M9 9l14 14M23 9L9 23"/></svg></button>
     <div class="ask-q" id="askQ">هل أتممت دراسة الرقم <b id="askN"></b>؟</div>
     <button class="tab" id="askTest"><svg class="ic" viewBox="0 0 32 32" fill="currentColor" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M11 7.5v17l14-8.5z"/></svg>اختبر الآن</button>
+    <button class="tab" id="askSkip">ليس الآن</button>
   </div>
 </div>
 
@@ -723,9 +736,11 @@ function pick(n, quiet){
   persist();
   if(!quiet){ tone([660]); speak(n); }
 }
-/* تغيير الرقم من صفحة التعلّم: إن لم يُختبَر الرقم الحالي بعد، نسأل الطفل أولًا */
+/* تغيير الرقم من صفحة التعلّم: إن لم يُختبَر الرقم الحالي بعد، نسأل الطفل أولًا
+   (askTarget: الرقم الذي أراد الانتقال إليه، ليُفتح عند «ليس الآن») */
+let askTarget = null;
 function requestPick(n){
-  if(n !== cur && !studied.has(cur)) return showAsk();
+  if(n !== cur && !studied.has(cur)){ askTarget = n; return showAsk(); }
   pick(n);
 }
 function updateShapeBtn(){
@@ -749,9 +764,15 @@ function showAsk(){
   $('askTest').focus();
 }
 function hideAsk(){ $('ask').classList.add('hidden'); }
-$('askClose').onclick = () => { hideAsk(); $('grid').children[cur].focus(); };
-$('ask').onclick = e => { if(e.target === $('ask')) hideAsk(); };
-$('askTest').onclick = () => { hideAsk(); openMini(); };
+$('askClose').onclick = () => { hideAsk(); askTarget = null; $('grid').children[cur].focus(); };
+$('ask').onclick = e => { if(e.target === $('ask')){ hideAsk(); askTarget = null; } };
+$('askTest').onclick = () => { hideAsk(); askTarget = null; openMini(); };
+/* «ليس الآن»: تخطي الاختبار والانتقال للرقم المختار */
+$('askSkip').onclick = () => {
+  hideAsk();
+  if(askTarget !== null) pick(askTarget);
+  askTarget = null;
+};
 
 /* العب */
 const TOTAL = 10;
@@ -896,8 +917,8 @@ function nextMini(){
   $('mCount').textContent = fmt(mR) + ' من ' + fmt(MROUNDS);
   $('mQ').textContent = mN === 0 ? 'أين المربع الفارغ؟' : 'أين المجموعة التي فيها ' + NAMES[mN] + '؟';
   $('mMsg').textContent = '';
+  /* ترتيب المربعات (ثلاثة متجاورة، أو اثنان وواحد تحتهما على الهاتف) تتولّاه CSS */
   const list = shuffle([mN, ...pickOthers([...Array(11).keys()], mN, 2)]);
-  $('mCards').style.gridTemplateColumns = 'repeat(' + list.length + ',1fr)';
   const emoji = mEmoji[(mR - 1) % mEmoji.length];
   $('mCards').innerHTML = '';
   list.forEach(c => {
@@ -950,7 +971,7 @@ $('mAgain').onclick = openMini;
 document.addEventListener('keydown', e => {
   if(e.key !== 'Escape') return;
   if(!$('install').classList.contains('hidden')) hideInstall();
-  else if(!$('ask').classList.contains('hidden')) hideAsk();
+  else if(!$('ask').classList.contains('hidden')){ hideAsk(); askTarget = null; }
   else if(!$('mini').classList.contains('hidden')) closeMini();
 });
 
@@ -977,7 +998,7 @@ $('homeBtn').onclick = () => {
 };
 window.addEventListener('popstate', e => {
   const st = e.state || {};
-  hideAsk();
+  hideAsk(); askTarget = null;
   if(st.v !== 'mini' && !$('mini').classList.contains('hidden')){
     clearTimeout(mTimer);
     $('mini').classList.add('hidden');
