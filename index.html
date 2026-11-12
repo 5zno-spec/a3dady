@@ -290,9 +290,6 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .mcard.ok{background:rgba(43,185,143,.5)}
 .mcard.no{background:rgba(255,90,78,.5);border-color:#FF5A4E;animation:shake .45s ease-in-out}
 .mcard:disabled{cursor:default}
-.m-btns{display:flex;gap:10px;margin-top:6px}
-#mAgain{background:linear-gradient(#5FDDB3,#2BB98F);color:#fff;padding:10px 26px}
-#mBack{background:#fff;padding:10px 26px}
 /* على الهاتف: مربعان في الصف الأول والثالث في المنتصف تحتهما، فتكبر المربعات والأشكال بدل ثلاثة صغيرة متجاورة */
 @media (max-width:600px){
   .m-in{gap:10px}
@@ -302,6 +299,31 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
   .m-cards .mcard:last-child:nth-child(odd){grid-column:1 / -1;justify-self:center;width:calc(50% - 6px)}
   #mini .msg{margin-top:4px}
 }
+
+/* نافذة إتمام الاختبار: أحسنت، النجوم والدرجة، عدّاد ٣ ثوانٍ، وزرا الإعادة والرقم التالي */
+.m-res{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:20px;
+  background:rgba(23,48,77,.3);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  animation:insFade .25s ease both}
+.m-res-card{width:min(84vw,320px);padding:24px 22px 22px;display:flex;flex-direction:column;align-items:center;gap:8px;
+  border-radius:28px;background:#fff;box-shadow:0 18px 44px rgba(23,48,77,.28);text-align:center;
+  animation:insPop .45s cubic-bezier(.2,1.4,.4,1) both}
+.m-res-card .word{font-size:2.2rem;line-height:1.3}
+.m-res-card .stars{font-size:2.3rem;line-height:1.2;margin:0}
+.m-res-card .m-q{font-size:1.1rem;opacity:.75}
+/* العدّاد: حلقة تتناقص خلال ٣ ثوانٍ وفي وسطها الثواني المتبقية */
+.cd{position:relative;width:60px;height:60px;margin:6px 0 4px}
+.cd svg{width:100%;height:100%;transform:rotate(-90deg)}
+.cd circle{fill:none;stroke-width:5}
+.cd-bg{stroke:rgba(23,48,77,.1)}
+.cd-ring{stroke:#7C3AED;stroke-linecap:round;stroke-dasharray:138.23;stroke-dashoffset:0}
+.cd-ring.run{animation:cdRun 3s linear forwards}
+@keyframes cdRun{to{stroke-dashoffset:138.23}}
+.cd span{position:absolute;inset:0;display:grid;place-items:center;font-family:'Tajawal','Cairo',sans-serif;font-weight:700;font-size:1.45rem;color:#7C3AED}
+.m-btns{display:flex;gap:16px;margin-top:6px}
+.tab.rbtn{width:60px;height:60px;padding:0}
+.tab.rbtn .ic{margin:0;width:1.7em;height:1.7em}
+#mAgain{background:#EEF2F7;color:var(--ink)}
+#mNext{background:linear-gradient(#6EE3BD,#2BB98F);color:#fff;box-shadow:0 6px 16px rgba(43,185,143,.4)}
 
 /* ===== نافذة «هل أتممت دراسة الرقم؟» ===== */
 #ask{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:20px;
@@ -499,11 +521,18 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
       <div class="m-cards" id="mCards"></div>
       <div class="msg" id="mMsg" aria-live="polite"></div>
     </div>
-    <div id="mResult" class="m-in hidden">
+  </div>
+  <!-- نافذة إتمام الاختبار -->
+  <div id="mResult" class="m-res hidden" role="status">
+    <div class="m-res-card">
       <div class="word">أحسنت!</div>
       <div class="stars" id="mStars"></div>
       <div class="m-q" id="mScore"></div>
-      <div class="m-btns"><button class="tab" id="mAgain">مرة أخرى</button><button class="tab" id="mBack">رجوع</button></div>
+      <div class="cd" aria-hidden="true"><svg viewBox="0 0 52 52"><circle class="cd-bg" cx="26" cy="26" r="22"/><circle class="cd-ring" id="mCdRing" cx="26" cy="26" r="22"/></svg><span id="mCdN"></span></div>
+      <div class="m-btns">
+        <button class="tab rbtn" id="mAgain" aria-label="إعادة الاختبار"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24.6 11A9.5 9.5 0 1 0 25.5 17.5"/><path d="M25.5 5.5v6h-6"/></svg></button>
+        <button class="tab rbtn" id="mNext" aria-label="الرقم التالي"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8l-8 8 8 8M25 8l-8 8 8 8"/></svg></button>
+      </div>
     </div>
   </div>
 </div>
@@ -894,7 +923,7 @@ applyDigits(saved);
    الدرجة: عدد الجولات التي أجاب فيها صحيحًا من أول محاولة (من ٥) */
 let mN = 0, mR = 0, mLock = false, mEmoji = [], mTimer = 0, mFirst = 0, mMiss = false;
 function openMini(){
-  clearTimeout(mTimer);   // إلغاء أي جولة مؤجلة من فتح سابق
+  clearTimeout(mTimer); stopCountdown();   // إلغاء أي جولة أو عدّ تنازلي مؤجّل من فتح سابق
   if(!(history.state && history.state.v === 'mini')) history.pushState({v: 'mini', tab: 'learn', depth: 3}, '');
   mN = cur; mR = 0; mFirst = 0;
   mEmoji = shuffle(SETS[mN].slice());   // شكل مختلف لكل جولة دون تكرار
@@ -906,7 +935,7 @@ function openMini(){
   speak(mN);
 }
 function closeMini(){
-  clearTimeout(mTimer);
+  clearTimeout(mTimer); stopCountdown();
   if(history.state && history.state.v === 'mini') history.back();   // popstate يغلقها
   else { $('mini').classList.add('hidden'); $('miniBtn').focus(); }
 }
@@ -943,17 +972,51 @@ function nextMini(){
     $('mCards').appendChild(b);
   });
 }
+/* إتمام الاختبار: نافذة «أحسنت» مع عدّ تنازلي ٣ ثوانٍ ثم الانتقال لبطاقات الأعداد */
 function finishMini(){
-  $('mRound').classList.add('hidden'); $('mResult').classList.remove('hidden');
   $('mCount').textContent = '';
   const prev = stats[mN];
   stats[mN] = {best: Math.max(prev ? prev.best : 0, mFirst), last: mFirst, tries: (prev ? prev.tries : 0) + 1, date: Date.now()};
   const st = Math.max(1, starCount(mFirst));
   $('mStars').textContent = '⭐'.repeat(st) + '☆'.repeat(3 - st);
   $('mScore').textContent = 'درجتك ' + fmt(mFirst) + ' من ' + fmt(MROUNDS);
+  $('mNext').classList.toggle('hidden', mN >= 10);   // لا رقم بعد العشرة
+  $('mResult').classList.remove('hidden');
   studied.add(mN); updateNums(); persist();
   tone([523, 659, 784, 1047]);
-  $('mAgain').focus();
+  ($('mNext').classList.contains('hidden') ? $('mAgain') : $('mNext')).focus();
+  startCountdown();
+}
+let cdTimer = 0;
+function startCountdown(){
+  let left = 3;
+  $('mCdN').textContent = fmt(left);
+  const ring = $('mCdRing');
+  ring.classList.remove('run'); void ring.getBoundingClientRect(); ring.classList.add('run');   // إعادة تشغيل حركة الحلقة
+  clearInterval(cdTimer);
+  cdTimer = setInterval(() => {
+    left--;
+    if(left <= 0){ stopCountdown(); toCards(); }
+    else $('mCdN').textContent = fmt(left);
+  }, 1000);
+}
+function stopCountdown(){ clearInterval(cdTimer); }
+/* بعد إغلاق الاختبار بالرجوع في السجل ننفّذ الخطوة التالية (البطاقات أو الرقم التالي) */
+let afterPop = null;
+function toCards(){
+  stopCountdown();
+  const goCards = () => { history.replaceState({v: 'sec', tab: 'cards', depth: 1}, ''); show('cards'); };
+  const d = history.state && history.state.v === 'mini' ? history.state.depth : 0;
+  if(d >= 2){ afterPop = goCards; history.go(-(d - 1)); }
+  else { $('mini').classList.add('hidden'); goCards(); }
+}
+function toNext(){
+  stopCountdown();
+  const n = mN + 1;
+  if(n > 10) return toCards();
+  afterPop = () => pick(n);
+  if(history.state && history.state.v === 'mini') history.back();
+  else { $('mini').classList.add('hidden'); const f = afterPop; afterPop = null; f(); }
 }
 /* الرقم يتلوّن وتظهر عليه علامة صح حين يُكمل الطفل اختباره */
 function updateNums(){
@@ -966,8 +1029,8 @@ function updateNums(){
 updateNums();
 $('miniBtn').onclick = openMini;
 $('mClose').onclick = closeMini;
-$('mBack').onclick = closeMini;
 $('mAgain').onclick = openMini;
+$('mNext').onclick = toNext;
 document.addEventListener('keydown', e => {
   if(e.key !== 'Escape') return;
   if(!$('install').classList.contains('hidden')) hideInstall();
@@ -1000,7 +1063,7 @@ window.addEventListener('popstate', e => {
   const st = e.state || {};
   hideAsk(); askTarget = null;
   if(st.v !== 'mini' && !$('mini').classList.contains('hidden')){
-    clearTimeout(mTimer);
+    clearTimeout(mTimer); stopCountdown();
     $('mini').classList.add('hidden');
     $('miniBtn').focus();
   }
@@ -1015,6 +1078,7 @@ window.addEventListener('popstate', e => {
     setHome(true);
     $('hb1').focus();
   }
+  if(afterPop){ const f = afterPop; afterPop = null; f(); }
 });
 
 /* العمل بلا إنترنت */
