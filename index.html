@@ -32,6 +32,7 @@
   --sky:#DDF1FF; --ink:#17304D; --sun:#FFC83D; --coral:#FF6B5E;
   --mint:#2BB98F; --white:#FFFFFF; --shadow:#17304D;
   --scene:linear-gradient(180deg,#8FD3F8 0%,#BDE8FB 42%,#D5F2D0 72%,#8ED17C 100%);
+  --check:#2BB98F url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5.5 12.5l4.2 4.2L18.5 7.8' fill='none' stroke='%23fff' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/72% no-repeat;
 }
 *{box-sizing:border-box;margin:0}
 html,body{height:100%}
@@ -74,7 +75,7 @@ body{
 .tab:active{transform:scale(.96)}
 .btn:active{transform:translateY(4px);box-shadow:0 0 0 var(--shadow)}
 /* لمعة علوية على كل الأزرار */
-.tab::before,.btn::before,.num::before,.choice::before{
+.tab::before,.btn::before,.num::before,.choice::before,.card::before{
   content:"";position:absolute;inset:5px 14% auto 14%;height:32%;border-radius:999px;
   background:linear-gradient(rgba(255,255,255,.7),rgba(255,255,255,0));pointer-events:none}
 .num::before,.choice::before{inset:3px 14% auto 14%}
@@ -100,6 +101,26 @@ body{
 #mute{padding:6px 9px;font-size:1.2rem;line-height:1;background:#D8F5E4}
 
 main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
+
+/* ===== بطاقات الأعداد: أول ما يظهر عند فتح «الأعداد» ===== */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:6px 8px 12px}
+.card{
+  position:relative;aspect-ratio:1;display:grid;place-items:center;cursor:pointer;
+  font-family:'Lalezar','Cairo',sans-serif;font-size:clamp(2.8rem,14vw,4.2rem);line-height:1.4;
+  background:var(--b,#fff);color:var(--ink);
+  border:2px solid var(--ink);border-radius:22px;box-shadow:0 4px 0 var(--shadow);
+  transition:transform .08s, box-shadow .08s;
+}
+.cards .card:nth-child(6n+1){--b:#FF9FB0}
+.cards .card:nth-child(6n+2){--b:#FFC27A}
+.cards .card:nth-child(6n+3){--b:#FFE27A}
+.cards .card:nth-child(6n+4){--b:#8FE3A8}
+.cards .card:nth-child(6n+5){--b:#9CCBFF}
+.cards .card:nth-child(6n){--b:#C9B3FF}
+@media (hover:hover){.card:hover{transform:translateY(-3px) rotate(-2deg)}}
+.card:active{transform:translateY(4px);box-shadow:0 0 0 var(--shadow)}
+.card.done::after{content:"";position:absolute;top:-10px;inset-inline-end:-8px;width:28px;height:28px;border-radius:50%;
+  background:var(--check);border:2px solid var(--ink);box-shadow:0 2px 0 rgba(23,48,77,.35)}
 
 /* ===== اللوحة الزجاجية ذات الإطار المتقطع ===== */
 .stage{
@@ -178,8 +199,7 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .num.done:not([aria-pressed="true"]){background:var(--b);color:var(--ink);border-color:var(--ink);box-shadow:0 2px 0 var(--shadow)}
 .num:active{transform:translateY(4px)!important}
 .num.done::after{content:"";position:absolute;top:-9px;inset-inline-end:-6px;width:18px;height:18px;border-radius:50%;
-  background:#2BB98F url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5.5 12.5l4.2 4.2L18.5 7.8' fill='none' stroke='%23fff' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/72% no-repeat;
-  border:2px solid var(--ink);box-shadow:0 2px 0 rgba(23,48,77,.35)}
+  background:var(--check);border:2px solid var(--ink);box-shadow:0 2px 0 rgba(23,48,77,.35)}
 @media (max-width:380px){.num{font-size:1.35rem}}
 
 /* ===== العب مع الأعداد ===== */
@@ -227,7 +247,7 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .stars{font-size:3rem;margin:8px 0}
 .result .btn{margin-top:10px;background:var(--sun)}
 
-/* ===== لعبة الرقم المحدد ===== */
+/* ===== لعبة الرقم المحدد (اختبار الرقم) ===== */
 #mini{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;padding:16px 14px 28px;overflow:auto;background:var(--scene)}
 .m-in{width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:14px}
 .m-top{width:100%;display:flex;justify-content:space-between;align-items:center}
@@ -245,6 +265,18 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .m-btns{display:flex;gap:10px;margin-top:6px}
 #mAgain{background:linear-gradient(#5FDDB3,#2BB98F);color:#fff;padding:10px 26px}
 #mBack{background:#fff;padding:10px 26px}
+
+/* ===== نافذة «هل أتممت دراسة الرقم؟» ===== */
+#ask{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:20px;
+  background:rgba(23,48,77,.3);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  animation:insFade .25s ease both}
+.ask-card{position:relative;width:min(84vw,320px);padding:44px 22px 26px;display:flex;flex-direction:column;align-items:center;gap:20px;
+  border-radius:28px;background:#fff;box-shadow:0 18px 44px rgba(23,48,77,.28);text-align:center;
+  animation:insPop .45s cubic-bezier(.2,1.4,.4,1) both}
+.ask-q{font-size:1.35rem;font-weight:800;line-height:1.7}
+.ask-q b{font-family:'Lalezar','Cairo',sans-serif;font-weight:400;font-size:1.7em;color:var(--coral);vertical-align:-.12em}
+.tab#askTest{background:linear-gradient(#6EE3BD,#2BB98F);color:#fff;padding:10px 28px;box-shadow:0 6px 16px rgba(43,185,143,.4)}
+.tab#askTest:active{transform:scale(.96);box-shadow:0 3px 8px rgba(43,185,143,.35)}
 
 /* ===== شاشة التحميل ===== */
 #splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;
@@ -309,9 +341,10 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
   box-shadow:0 6px 16px rgba(43,185,143,.4)}
 .tab#insBtn .ic{margin:0;width:1.25em;height:1.25em}
 .tab#insBtn:active{transform:scale(.96);box-shadow:0 3px 8px rgba(43,185,143,.35)}
-.tab#insClose{position:absolute;top:12px;inset-inline-end:12px;width:34px;height:34px;padding:0;background:rgba(23,48,77,.07);color:rgba(23,48,77,.7)}
-.tab#insClose::before{display:none}
-.tab#insClose .ic{margin:0;width:1.1em;height:1.1em}
+/* علامة الإغلاق الصغيرة في زاوية النوافذ */
+.tab#insClose,.tab#askClose{position:absolute;top:12px;inset-inline-end:12px;width:34px;height:34px;padding:0;background:rgba(23,48,77,.07);color:rgba(23,48,77,.7)}
+.tab#insClose::before,.tab#askClose::before{display:none}
+.tab#insClose .ic,.tab#askClose .ic{margin:0;width:1.1em;height:1.1em}
 @keyframes insFade{from{opacity:0}to{opacity:1}}
 @keyframes insPop{from{transform:scale(.6) translateY(30px);opacity:0}to{transform:none;opacity:1}}
 
@@ -355,8 +388,13 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 </header>
 
 <main>
+  <!-- بطاقات الأعداد -->
+  <section id="cards" class="hidden">
+    <div class="cards" id="cardGrid"></div>
+  </section>
+
   <!-- تعلّم -->
-  <section id="learn">
+  <section id="learn" class="hidden">
     <div class="stage split" aria-live="polite">
       <svg class="frame" aria-hidden="true"><rect x="1.5" y="1.5" rx="22" ry="22"/></svg>
       <div class="half numhalf">
@@ -395,8 +433,8 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
   </section>
 </main>
 
-<!-- لعبة على الرقم المحدد -->
-<div id="mini" class="hidden" role="dialog" aria-modal="true" aria-label="لعبة الرقم">
+<!-- لعبة على الرقم المحدد (اختبار الرقم) -->
+<div id="mini" class="hidden" role="dialog" aria-modal="true" aria-label="اختبار الرقم">
   <div class="m-in">
     <div class="m-top">
       <div class="m-count" id="mCount"></div>
@@ -412,6 +450,15 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
       <div class="word">أحسنت!</div>
       <div class="m-btns"><button class="tab" id="mAgain">مرة أخرى</button><button class="tab" id="mBack">رجوع</button></div>
     </div>
+  </div>
+</div>
+
+<!-- نافذة: هل أتممت دراسة الرقم؟ -->
+<div id="ask" class="hidden" role="dialog" aria-modal="true" aria-labelledby="askQ">
+  <div class="ask-card">
+    <button class="tab" id="askClose" aria-label="إغلاق"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M9 9l14 14M23 9L9 23"/></svg></button>
+    <div class="ask-q" id="askQ">هل أتممت دراسة الرقم <b id="askN"></b>؟</div>
+    <button class="tab" id="askTest"><svg class="ic" viewBox="0 0 32 32" fill="currentColor" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M11 7.5v17l14-8.5z"/></svg>اختبر الآن</button>
   </div>
 </div>
 
@@ -445,14 +492,14 @@ let store = {};
 try{ store = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }catch(e){ store = {}; }
 const okIdx = a => Array.isArray(a) && a.length === 11 && a.every(v => Number.isInteger(v) && v >= 0 && v < 5);
 const shapeIdx = okIdx(store.shapeIdx) ? store.shapeIdx.slice() : Array(11).fill(0);
-/* الأرقام التي درسها الطفل (أكمل لعبتها بزر ▶): لعبة «العب مع الأعداد» لا تتجاوزها */
+/* الأرقام التي أنهى الطفل اختبارها: لعبة «العب مع الأعداد» لا تتجاوزها */
 const studied = new Set(Array.isArray(store.learned) ? store.learned.filter(n => Number.isInteger(n) && n >= 0 && n <= 10) : []);
-let curTab = 'learn', score = 0, qi = 0, answer, locked = false, qEmoji, qList = [], pending = false, done = false;
+let curTab = 'cards', score = 0, qi = 0, answer, locked = false, qEmoji, qList = [], pending = false, done = false;
 let best = Number.isInteger(store.best) ? store.best : 0;
 function persist(){
   try{
     localStorage.setItem(KEY, JSON.stringify({
-      cur, shapeIdx, muted, tab: curTab, best, learned: [...studied],
+      cur, shapeIdx, muted, best, learned: [...studied],
       game: {score, qi, answer, emoji: qEmoji, list: qList, pending, done}
     }));
   }catch(e){}
@@ -531,13 +578,11 @@ function applyMute(){
 $('mute').onclick = () => { muted = !muted; applyMute(); persist(); };
 if(muted) applyMute();
 
-/* تبويبات */
-function show(tab, resume){
+/* الأقسام: بطاقات الأعداد، تعلّم رقم، العب مع الأعداد */
+function show(tab){
   curTab = tab;
-  const learn = tab === 'learn';
-  $('learn').classList.toggle('hidden', !learn);
-  $('play').classList.toggle('hidden', learn);
-  if(!learn && (qi === 0 || (done && !resume))) startGame();
+  ['cards', 'learn', 'play'].forEach(s => $(s).classList.toggle('hidden', s !== tab));
+  if(tab === 'play' && (qi === 0 || done)) startGame();
   persist();
 }
 
@@ -548,13 +593,28 @@ function renderShapes(el, id, n){
   el.innerHTML = '<div class="sg">' + `<span class="c"><img src="img/shapes/${id}.webp" alt="" draggable="false"></span>`.repeat(n) + '</div>';
 }
 
+/* بطاقات الأعداد: الضغط على بطاقة يفتح صفحة تعلّم الرقم وينطقه */
+const cardGrid = $('cardGrid');
+for(let n=0;n<=10;n++){
+  const b = document.createElement('button');
+  b.className = 'card'; b.dataset.n = n; b.innerHTML = fmtH(n);
+  b.setAttribute('aria-label', NAMES[n]);
+  b.onclick = () => openLearn(n);
+  cardGrid.appendChild(b);
+}
+function openLearn(n){
+  history.pushState({v: 'sec', tab: 'learn', depth: 2}, '');
+  show('learn');
+  pick(n);
+}
+
 /* تعلّم */
 const grid = $('grid');
 for(let n=0;n<=10;n++){
   const b = document.createElement('button');
   b.className = 'num'; b.dataset.n = n; b.innerHTML = fmtH(n);
   b.setAttribute('aria-label', NAMES[n]); b.setAttribute('aria-pressed', 'false');
-  b.onclick = () => pick(n);
+  b.onclick = () => requestPick(n);
   grid.appendChild(b);
 }
 let cur = 1;
@@ -567,6 +627,11 @@ function pick(n, quiet){
   updateShapeBtn();
   persist();
   if(!quiet){ tone([660]); speak(n); }
+}
+/* تغيير الرقم من صفحة التعلّم: إن لم يُختبَر الرقم الحالي بعد، نسأل الطفل أولًا */
+function requestPick(n){
+  if(n !== cur && !studied.has(cur)) return showAsk();
+  pick(n);
 }
 function updateShapeBtn(){
   const b = $('shapeBtn');
@@ -581,6 +646,17 @@ $('shapeBtn').onclick = () => {
   speak(cur);
 };
 pick(Number.isInteger(store.cur) && store.cur >= 0 && store.cur <= 10 ? store.cur : 1, true);
+
+/* نافذة: هل أتممت دراسة الرقم؟ */
+function showAsk(){
+  $('askN').innerHTML = fmtH(cur);
+  $('ask').classList.remove('hidden');
+  $('askTest').focus();
+}
+function hideAsk(){ $('ask').classList.add('hidden'); }
+$('askClose').onclick = () => { hideAsk(); $('grid').children[cur].focus(); };
+$('ask').onclick = e => { if(e.target === $('ask')) hideAsk(); };
+$('askTest').onclick = () => { hideAsk(); openMini(); };
 
 /* العب */
 const TOTAL = 10;
@@ -662,7 +738,7 @@ function finish(){
   tone([523, 659, 784, 1047]);
 }
 $('again').onclick = startGame;
-$('toLearn').onclick = () => { history.replaceState({v: 'sec', tab: 'learn'}, ''); show('learn'); };
+$('toLearn').onclick = () => { history.replaceState({v: 'sec', tab: 'cards', depth: 1}, ''); show('cards'); };
 
 /* خيار شكل الأرقام */
 function applyDigits(mode, save){
@@ -670,8 +746,9 @@ function applyDigits(mode, save){
   $('d-ar').setAttribute('aria-pressed', mode === 'ar');
   $('d-en').setAttribute('aria-pressed', mode === 'en');
   if(save){ try{ localStorage.setItem('digits', mode); }catch(e){} }
-  [...grid.children].forEach(b => b.innerHTML = fmtH(b.dataset.n));
+  [...grid.children, ...cardGrid.children].forEach(b => b.innerHTML = fmtH(b.dataset.n));
   pick(cur, true);
+  if(!$('ask').classList.contains('hidden')) $('askN').innerHTML = fmtH(cur);
   if(qi){
     updateBar();
     [...$('choices').children].forEach(b => b.innerHTML = fmtH(b.dataset.n));
@@ -683,29 +760,25 @@ $('d-en').onclick = () => applyDigits('en', true);
 let saved = 'ar';
 try{ saved = localStorage.getItem('digits') === 'en' ? 'en' : 'ar'; }catch(e){}
 
-/* استرجاع اللعبة المحفوظة */
+/* استرجاع اللعبة المحفوظة (اللعبة الجارية فقط؛ اللعبة المنتهية تبدأ من جديد) */
 (function restoreGame(){
   const g = store.game;
-  if(!g || !Number.isInteger(g.qi) || g.qi < 1 || !Number.isInteger(g.score)) return;
+  if(!g || g.done || !Number.isInteger(g.qi) || g.qi < 1 || !Number.isInteger(g.score)) return;
   const valid = Number.isInteger(g.answer) && Array.isArray(g.list) && (g.list.length === 2 || g.list.length === 3) &&
     g.list.every(n => Number.isInteger(n) && n >= 1 && n <= 10 && studied.has(n)) && g.list.includes(g.answer) && EMOJI.includes(g.emoji);
-  if(!g.done && !valid) return;
-  score = g.score; qi = g.qi; answer = g.answer; done = !!g.done; pending = !!g.pending;
-  if(done){
-    $('round').classList.add('hidden'); $('result').classList.remove('hidden');
-    const s = score >= 9 ? 3 : score >= 6 ? 2 : 1;
-    $('stars').textContent = '⭐'.repeat(s) + '☆'.repeat(3 - s);
-  }else if(pending){ nextQ(); }
+  if(!valid) return;
+  score = g.score; qi = g.qi; answer = g.answer; pending = !!g.pending;
+  if(pending) nextQ();
   else buildQ(g.emoji, g.list);
 })();
 applyDigits(saved);
 
-/* لعبة الرقم المحدد: اختر المجموعة التي فيها هذا العدد */
+/* اختبار الرقم (زر ▶ أو «اختبر الآن»): اختر المجموعة التي فيها هذا العدد */
 const MROUNDS = 5;
 let mN = 0, mR = 0, mLock = false, mEmoji = [], mTimer = 0;
 function openMini(){
   clearTimeout(mTimer);   // إلغاء أي جولة مؤجلة من فتح سابق
-  if(!(history.state && history.state.v === 'mini')) history.pushState({v: 'mini', tab: 'learn'}, '');
+  if(!(history.state && history.state.v === 'mini')) history.pushState({v: 'mini', tab: 'learn', depth: 3}, '');
   mN = cur; mR = 0;
   mEmoji = shuffle(SETS[mN].slice());   // شكل مختلف لكل جولة دون تكرار
   $('mNum').innerHTML = fmtH(mN);
@@ -758,9 +831,9 @@ function finishMini(){
   tone([523, 659, 784, 1047]);
   $('mAgain').focus();
 }
-/* زر الرقم يتلوّن حين يُكمل الطفل لعبته */
+/* الرقم يتلوّن وتظهر عليه علامة صح حين يُكمل الطفل اختباره */
 function updateNums(){
-  [...grid.children].forEach(b => {
+  [...grid.children, ...cardGrid.children].forEach(b => {
     const n = +b.dataset.n, d = studied.has(n);
     b.classList.toggle('done', d);
     b.setAttribute('aria-label', NAMES[n] + (d ? ' - تم' : ''));
@@ -774,10 +847,11 @@ $('mAgain').onclick = openMini;
 document.addEventListener('keydown', e => {
   if(e.key !== 'Escape') return;
   if(!$('install').classList.contains('hidden')) hideInstall();
+  else if(!$('ask').classList.contains('hidden')) hideAsk();
   else if(!$('mini').classList.contains('hidden')) closeMini();
 });
 
-/* الواجهة الرئيسية: تظهر بعد شاشة التحميل، والزر الأول فقط مفعّل حاليًا */
+/* الواجهة الرئيسية: تظهر بعد شاشة التحميل */
 function setHome(on){
   $('home').classList.toggle('hidden', !on);
   document.querySelector('header').inert = on;
@@ -785,28 +859,33 @@ function setHome(on){
 }
 setHome(true);
 
-/* زر الرجوع في الهاتف: من تعلّم أو العب يعود إلى الواجهة الرئيسية، ومن لعبة الرقم يغلقها أولًا */
+/* التنقل وزر الرجوع في الهاتف:
+   الرئيسية ← بطاقات الأعداد (depth 1) ← تعلّم رقم (depth 2) ← اختبار الرقم (depth 3)
+   الرئيسية ← العب مع الأعداد (depth 1). الرجوع يعود خطوة واحدة، والشعار يعود للرئيسية مباشرة */
 if(history.state) history.replaceState(null, '');
-function enter(tab){ history.pushState({v: 'sec', tab}, ''); show(tab); setHome(false); }
-$('hb1').onclick = () => enter('learn');
+function enter(tab){ history.pushState({v: 'sec', tab, depth: 1}, ''); show(tab); setHome(false); }
+$('hb1').onclick = () => enter('cards');
 $('hb4').onclick = () => enter('play');
 $('homeBtn').onclick = () => {
-  if(history.state && history.state.v === 'sec') history.back();
+  const d = history.state && history.state.depth;
+  if(d) history.go(-d);
   else { setHome(true); $('hb1').focus(); }
 };
 window.addEventListener('popstate', e => {
   const st = e.state || {};
+  hideAsk();
   if(st.v !== 'mini' && !$('mini').classList.contains('hidden')){
     clearTimeout(mTimer);
     $('mini').classList.add('hidden');
     $('miniBtn').focus();
   }
   if(st.v === 'mini' && $('mini').classList.contains('hidden')){
-    history.replaceState({v: 'sec', tab: st.tab}, '');   // تقدّم إلى لعبة مغلقة: نبقى في القسم
+    history.replaceState({v: 'sec', tab: 'learn', depth: st.depth}, '');   // تقدّم إلى اختبار مغلق: نبقى في صفحة التعلّم
     st.v = 'sec';
   }
   if(st.v === 'sec' || st.v === 'mini'){
-    if(!$('home').classList.contains('hidden')){ show(st.tab || 'learn'); setHome(false); }
+    if(st.tab !== curTab || !$('home').classList.contains('hidden')) show(st.tab || 'cards');
+    setHome(false);
   }else{
     setHome(true);
     $('hb1').focus();
