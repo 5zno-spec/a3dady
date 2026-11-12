@@ -1,10 +1,11 @@
 /* يعمل التطبيق بلا إنترنت: تُخزَّن الملفات عند أول زيارة ثم تُقدَّم من الجهاز */
-const VERSION = 'v36';
+const VERSION = 'v37';
 const CACHE = 'arabic-numbers-' + VERSION;
 const CORE = [
   './', 'index.html', 'manifest.webmanifest',
   'img/logo.webp', 'img/favicon-32.png', 'img/apple-touch-icon.png', 'img/icon-192.png', 'img/icon-512.png', 'img/icon-maskable-192.png', 'img/icon-maskable-512.png',
-  ...Array.from({length: 10}, (_, i) => 'audio/' + (i + 1) + '.mp3'),
+  /* الأرقام المتاحة صوتيًا: 0–13 و15 و17–21 و23–27 (تُضاف الباقية عند توفّرها، فـ addAll يفشل مع أي ملف مفقود) */
+  ...[0,1,2,3,4,5,6,7,8,9,10,11,12,13,15,17,18,19,20,21,23,24,25,26,27].map(n => 'audio/' + n + '.mp3'),
   ...['seed','faucet','watering-can','shower','tree','house','rocket','backpack','net','gift','comb','candle','frog','key','fish','brush'].map(s => 'img/shapes/' + s + '.webp')
 ];
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
