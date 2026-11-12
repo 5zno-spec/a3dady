@@ -2,7 +2,7 @@
 const VERSION = 'v41';
 const CACHE = 'arabic-numbers-' + VERSION;
 const CORE = [
-  './', 'index.html', 'manifest.webmanifest',
+  './', 'index.html', 'style.css', 'app.js', 'manifest.webmanifest',
   'img/logo.webp', 'img/favicon-32.png', 'img/apple-touch-icon.png', 'img/icon-192.png', 'img/icon-512.png', 'img/icon-maskable-192.png', 'img/icon-maskable-512.png',
   ...Array.from({length: 51}, (_, i) => 'audio/' + i + '.mp3'),          // أصوات الأرقام ٠ – ٥٠
   ...Array.from({length: 5}, (_, i) => 'audio/praise/' + (i + 1) + '.mp3'),   // عبارات التشجيع
