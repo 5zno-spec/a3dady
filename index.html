@@ -165,6 +165,15 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .word{font-size:2rem;font-weight:800}
 .q{font-size:1.5rem;font-weight:800;text-align:center;margin-bottom:8px}
 .msg{min-height:2rem;text-align:center;font-size:1.3rem;font-weight:800;margin-top:14px}
+/* فقاعة الثناء عند الإجابة الصحيحة */
+.praise{position:fixed;inset-inline:0;top:20vh;margin:0 auto;width:max-content;max-width:86vw;z-index:60;pointer-events:none;
+  padding:12px 30px;border:3px solid var(--ink);border-radius:28px;background:#fff;color:var(--ink);
+  box-shadow:0 5px 0 var(--shadow);font-size:clamp(1.6rem,7vw,2.3rem);font-weight:900;text-align:center;line-height:1.3;
+  opacity:0;transform:scale(.4)}
+.praise::after{content:"";position:absolute;bottom:-14px;left:50%;width:22px;height:22px;background:#fff;
+  border:3px solid var(--ink);border-top:0;border-inline-start:0;transform:translateX(-50%) rotate(45deg);border-radius:0 0 6px 0}
+.praise.show{animation:praisePop .5s cubic-bezier(.2,1.5,.4,1) forwards}
+@keyframes praisePop{0%{opacity:0;transform:scale(.4) rotate(-6deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
 
 /* مربع الأشكال: تُرتَّب في شبكة تملأ المربع */
 .half{aspect-ratio:1;container-type:size;min-width:0}
@@ -417,6 +426,7 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 </style>
 </head>
 <body class="loading">
+<div id="praise" class="praise" role="status" aria-live="polite"></div>
 <div id="splash" aria-label="جارٍ التحميل"><img class="sp-logo" src="img/logo.webp" width="220" height="220" alt="أعدادي اللطيفة" fetchpriority="high" decoding="sync"><div class="sp-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div class="sp-fill"></div></div></div>
 <div class="sky" aria-hidden="true">
   <div class="cloud" style="--t:6%;--w:180px;--x:5vw;--d:70s;--o:-12s"></div>
@@ -646,25 +656,61 @@ function wrong(){
 }
 const ICON_SOUND = `<svg class="ic ic-lg" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 12.5h4.5l6-5v17l-6-5H5.5z"/><path d="M21 12.2c1.9 2.3 1.9 5.3 0 7.6M24.4 9.2c3.5 4 3.5 9.6 0 13.6"/></svg>`, ICON_MUTE = `<svg class="ic ic-lg" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 12.5h4.5l6-5v17l-6-5H5.5z"/><path d="M21.5 12.5l6 7M27.5 12.5l-6 7"/></svg>`;
 let current;
-function speak(n){
-  if(muted) return;
+/* ينطق العدد، ثم ينادي done مرة واحدة عند انتهاء الصوت (أو فشله) */
+function speak(n, done){
+  let ended = false;
+  const end = () => { if(ended) return; ended = true; if(done) done(); };
+  if(muted) return end();
   try{ if(current) current.pause(); speechSynthesis.cancel(); }catch(e){}
-  // يحاول أولًا تشغيل ملف مسجّل: audio/0.mp3 ... audio/10.mp3
+  // يحاول أولًا تشغيل ملف مسجّل: audio/0.mp3 ... audio/50.mp3
   const a = new Audio('audio/' + n + '.mp3');
   current = a;
   // البديل (النطق الآلي) يعمل مرة واحدة فقط، ولآخر صوت طُلب فقط
   let fell = false;
-  const fallback = () => { if(fell || current !== a) return; fell = true; synth(NAMES[n]); };
+  const fallback = () => { if(fell || current !== a) return end(); fell = true; synth(NAMES[n], end); };
+  a.onended = end;
   a.onerror = fallback;
   a.play().catch(fallback);
+  setTimeout(end, 8000);   // أمان: لا ننتظر أكثر من ٨ ثوانٍ
 }
-function synth(text){
+/* فقاعة الثناء: عبارة تُختار عشوائيًا، وصوتها (إن وُجد) في audio/praise/رقم-العبارة.mp3 */
+const PRAISE = ['أحسنت!', 'رائع!', 'ممتاز!', 'برافو!', 'عظيم!', 'شاطر!', 'يا بطل!', 'مذهل!'];
+let lastPraise = -1, praiseTimer;
+function showPraise(){
+  let i; do{ i = Math.floor(Math.random() * PRAISE.length); }while(i === lastPraise && PRAISE.length > 1);
+  lastPraise = i;
+  const el = $('praise');
+  clearTimeout(praiseTimer);
+  el.classList.remove('show'); void el.offsetWidth;
+  el.textContent = PRAISE[i]; el.classList.add('show');
+  praiseTimer = setTimeout(hidePraise, 6000);
+  return i;
+}
+function hidePraise(){ clearTimeout(praiseTimer); $('praise').classList.remove('show'); }
+function playPraise(i, done){
+  let ended = false;
+  const end = () => { if(ended) return; ended = true; if(done) done(); };
+  if(muted) return end();
+  const a = new Audio('audio/praise/' + (i + 1) + '.mp3');
+  current = a;
+  a.onended = end; a.onerror = end;   // لا ملف = لا صوت (تظهر الفقاعة فقط)
+  a.play().catch(end);
+  setTimeout(end, 6000);
+}
+/* بعد الإجابة الصحيحة: فقاعة الثناء، ثم نطق العدد، ثم صوت العبارة، ثم next (بعد minMs على الأقل) */
+function celebrate(n, minMs, next){
+  const i = showPraise(), t0 = Date.now();
+  const finish = () => setTimeout(() => { hidePraise(); next(); }, Math.max(0, minMs - (Date.now() - t0)));
+  setTimeout(() => speak(n, () => playPraise(i, finish)), 500);
+}
+function synth(text, done){
   try{
-    if(!('speechSynthesis' in window)) return;
+    if(!('speechSynthesis' in window)) return done && done();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ar-SA'; u.rate = .8;
+    if(done){ u.onend = done; u.onerror = done; }
     speechSynthesis.speak(u);
-  }catch(e){}
+  }catch(e){ if(done) done(); }
 }
 function applyMute(){
   $('mute').innerHTML = muted ? ICON_MUTE : ICON_SOUND;
@@ -864,9 +910,8 @@ function choose(btn, n){
     btn.classList.add('ok');
     tone([523, 659, 784]);
     $('msg').textContent = 'صحيح! ' + NAMES[n];
-    setTimeout(() => speak(n), 500);
     updateBar();
-    setTimeout(nextQ, 1300);
+    celebrate(n, 1300, nextQ);
   }else{
     btn.classList.add('no'); btn.disabled = true;
     wrong();
@@ -961,8 +1006,7 @@ function nextMini(){
         mLock = true; if(!mMiss) mFirst++;
         b.classList.add('ok'); tone([523, 659, 784]);
         $('mMsg').textContent = 'صحيح! ' + NAMES[mN];
-        setTimeout(() => speak(mN), 500);
-        mTimer = setTimeout(nextMini, 1500);
+        celebrate(mN, 1500, nextMini);
       }else{
         mMiss = true;
         b.classList.add('no'); b.disabled = true; wrong();
