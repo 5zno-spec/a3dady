@@ -165,15 +165,6 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .word{font-size:2rem;font-weight:800}
 .q{font-size:1.5rem;font-weight:800;text-align:center;margin-bottom:8px}
 .msg{min-height:2rem;text-align:center;font-size:1.3rem;font-weight:800;margin-top:14px}
-/* فقاعة الثناء عند الإجابة الصحيحة */
-.praise{position:fixed;inset-inline:0;top:20vh;margin:0 auto;width:max-content;max-width:86vw;z-index:60;pointer-events:none;
-  padding:12px 30px;border:3px solid var(--ink);border-radius:28px;background:#fff;color:var(--ink);
-  box-shadow:0 5px 0 var(--shadow);font-size:clamp(1.6rem,7vw,2.3rem);font-weight:900;text-align:center;line-height:1.3;
-  opacity:0;transform:scale(.4)}
-.praise::after{content:"";position:absolute;bottom:-14px;left:50%;width:22px;height:22px;background:#fff;
-  border:3px solid var(--ink);border-top:0;border-inline-start:0;transform:translateX(-50%) rotate(45deg);border-radius:0 0 6px 0}
-.praise.show{animation:praisePop .5s cubic-bezier(.2,1.5,.4,1) forwards}
-@keyframes praisePop{0%{opacity:0;transform:scale(.4) rotate(-6deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
 
 /* مربع الأشكال: تُرتَّب في شبكة تملأ المربع */
 .half{aspect-ratio:1;container-type:size;min-width:0}
@@ -334,6 +325,23 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 #mAgain{background:#EEF2F7;color:var(--ink)}
 #mNext{background:linear-gradient(#6EE3BD,#2BB98F);color:#fff;box-shadow:0 6px 16px rgba(43,185,143,.4)}
 
+/* ===== فقاعة التشجيع عند الإجابة الصحيحة (تظهر مع صوت العبارة ثم تختفي) ===== */
+.praise{position:fixed;left:50%;top:22%;z-index:80;pointer-events:none;
+  padding:10px 28px;border-radius:28px;background:#fff;color:var(--mint);
+  border:3px solid var(--mint);box-shadow:0 10px 28px rgba(23,48,77,.22);
+  font-family:'Lalezar','Cairo',sans-serif;font-size:2.1rem;line-height:1.45;white-space:nowrap;
+  transform:translateX(-50%);animation:praisePop 1.5s cubic-bezier(.2,1.4,.4,1) both}
+/* ذيل الفقاعة */
+.praise::after{content:"";position:absolute;bottom:-11px;left:50%;width:18px;height:18px;background:#fff;
+  border:3px solid var(--mint);border-top:0;border-left:0;border-radius:0 0 5px 0;transform:translateX(-50%) rotate(45deg)}
+@keyframes praisePop{
+  0%{opacity:0;transform:translate(-50%,18px) scale(.5)}
+  16%{opacity:1;transform:translate(-50%,0) scale(1.08)}
+  26%{transform:translate(-50%,0) scale(1)}
+  80%{opacity:1;transform:translate(-50%,0) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-14px) scale(.96)}
+}
+
 /* ===== نافذة «هل أتممت دراسة الرقم؟» ===== */
 #ask{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:20px;
   background:rgba(23,48,77,.3);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
@@ -426,7 +434,6 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 </style>
 </head>
 <body class="loading">
-<div id="praise" class="praise" role="status" aria-live="polite"></div>
 <div id="splash" aria-label="جارٍ التحميل"><img class="sp-logo" src="img/logo.webp" width="220" height="220" alt="أعدادي اللطيفة" fetchpriority="high" decoding="sync"><div class="sp-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div class="sp-fill"></div></div></div>
 <div class="sky" aria-hidden="true">
   <div class="cloud" style="--t:6%;--w:180px;--x:5vw;--d:70s;--o:-12s"></div>
@@ -573,6 +580,8 @@ const fmt = n => digits === 'ar' ? String(n).split('').map(d => AR[+d]).join('')
 const fmtH = n => fmt(n);
 const NAMES = ['صفر','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة'];
 const PAL = ['#FF9FB0','#FFC27A','#FFE27A','#8FE3A8','#9CCBFF','#C9B3FF'];   // ألوان الأرقام بالترتيب
+/* عبارات التشجيع: العبارة رقم i ينطقها الملف audio/praise/(i+1).mp3 */
+const PRAISE = ['أحسنت', 'ممتاز', 'رائع', 'ما شاء الله', 'بارك الله فيك'];
 /* الأشكال صور في img/shapes (الاسم هو اسم الملف) */
 const EMOJI = ['seed','faucet','watering-can','shower','tree','house','rocket','backpack','net','gift','comb','candle','frog','key','fish','brush'];
 EMOJI.forEach(id => { new Image().src = 'img/shapes/' + id + '.webp'; });
@@ -655,62 +664,40 @@ function wrong(){
   }catch(e){}
 }
 const ICON_SOUND = `<svg class="ic ic-lg" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 12.5h4.5l6-5v17l-6-5H5.5z"/><path d="M21 12.2c1.9 2.3 1.9 5.3 0 7.6M24.4 9.2c3.5 4 3.5 9.6 0 13.6"/></svg>`, ICON_MUTE = `<svg class="ic ic-lg" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 12.5h4.5l6-5v17l-6-5H5.5z"/><path d="M21.5 12.5l6 7M27.5 12.5l-6 7"/></svg>`;
+/* تشغيل ملف صوتي مسجّل، وإن فشل يُنطق النص بصوت الجهاز (مرة واحدة، ولآخر صوت طُلب فقط) */
 let current;
-/* ينطق العدد، ثم ينادي done مرة واحدة عند انتهاء الصوت (أو فشله) */
-function speak(n, done){
-  let ended = false;
-  const end = () => { if(ended) return; ended = true; if(done) done(); };
-  if(muted) return end();
+function playClip(src, text){
+  if(muted) return;
   try{ if(current) current.pause(); speechSynthesis.cancel(); }catch(e){}
-  // يحاول أولًا تشغيل ملف مسجّل: audio/0.mp3 ... audio/50.mp3
-  const a = new Audio('audio/' + n + '.mp3');
+  const a = new Audio(src);
   current = a;
-  // البديل (النطق الآلي) يعمل مرة واحدة فقط، ولآخر صوت طُلب فقط
   let fell = false;
-  const fallback = () => { if(fell || current !== a) return end(); fell = true; synth(NAMES[n], end); };
-  a.onended = end;
+  const fallback = () => { if(fell || current !== a) return; fell = true; synth(text); };
   a.onerror = fallback;
   a.play().catch(fallback);
-  setTimeout(end, 8000);   // أمان: لا ننتظر أكثر من ٨ ثوانٍ
 }
-/* فقاعة الثناء: عبارة تُختار عشوائيًا، وصوتها (إن وُجد) في audio/praise/رقم-العبارة.mp3 */
-const PRAISE = ['أحسنت!', 'ممتاز!', 'رائع!', 'ما شاء الله!', 'بارك الله فيك!'];   // الترتيب = audio/praise/1.mp3 … 5.mp3
-let lastPraise = -1, praiseTimer;
-function showPraise(){
-  let i; do{ i = Math.floor(Math.random() * PRAISE.length); }while(i === lastPraise && PRAISE.length > 1);
-  lastPraise = i;
-  const el = $('praise');
-  clearTimeout(praiseTimer);
-  el.classList.remove('show'); void el.offsetWidth;
-  el.textContent = PRAISE[i]; el.classList.add('show');
-  praiseTimer = setTimeout(hidePraise, 6000);
-  return i;
-}
-function hidePraise(){ clearTimeout(praiseTimer); $('praise').classList.remove('show'); }
-function playPraise(i, done){
-  let ended = false;
-  const end = () => { if(ended) return; ended = true; if(done) done(); };
-  if(muted) return end();
-  const a = new Audio('audio/praise/' + (i + 1) + '.mp3');
-  current = a;
-  a.onended = end; a.onerror = end;   // لا ملف = لا صوت (تظهر الفقاعة فقط)
-  a.play().catch(end);
-  setTimeout(end, 6000);
-}
-/* بعد الإجابة الصحيحة: فقاعة الثناء، ثم نطق العدد، ثم صوت العبارة، ثم next (بعد minMs على الأقل) */
-function celebrate(n, minMs, next){
-  const i = showPraise(), t0 = Date.now();
-  const finish = () => setTimeout(() => { hidePraise(); next(); }, Math.max(0, minMs - (Date.now() - t0)));
-  setTimeout(() => speak(n, () => playPraise(i, finish)), 500);
-}
-function synth(text, done){
+const speak = n => playClip('audio/' + n + '.mp3', NAMES[n]);
+function synth(text){
   try{
-    if(!('speechSynthesis' in window)) return done && done();
+    if(!('speechSynthesis' in window)) return;
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ar-SA'; u.rate = .8;
-    if(done){ u.onend = done; u.onerror = done; }
     speechSynthesis.speak(u);
-  }catch(e){ if(done) done(); }
+  }catch(e){}
+}
+/* فقاعة تشجيع عند الإجابة الصحيحة: عبارة عشوائية (لا تتكرر مرتين متتاليتين) تظهر ويُسمع صوتها */
+let lastPraise = -1, praiseEl = null, praiseT = 0, praiseA = 0;
+function praise(){
+  let i;
+  do{ i = Math.floor(Math.random() * PRAISE.length); }while(i === lastPraise);
+  lastPraise = i;
+  clearTimeout(praiseT); clearTimeout(praiseA);
+  if(praiseEl) praiseEl.remove();
+  const el = document.createElement('div');
+  el.className = 'praise'; el.setAttribute('role', 'status'); el.textContent = PRAISE[i];
+  document.body.appendChild(el); praiseEl = el;
+  praiseT = setTimeout(() => { el.remove(); if(praiseEl === el) praiseEl = null; }, 1550);
+  praiseA = setTimeout(() => playClip('audio/praise/' + (i + 1) + '.mp3', PRAISE[i]), 380);   // بعد نغمة النجاح
 }
 function applyMute(){
   $('mute').innerHTML = muted ? ICON_MUTE : ICON_SOUND;
@@ -910,8 +897,9 @@ function choose(btn, n){
     btn.classList.add('ok');
     tone([523, 659, 784]);
     $('msg').textContent = 'صحيح! ' + NAMES[n];
+    praise();
     updateBar();
-    celebrate(n, 1300, nextQ);
+    setTimeout(nextQ, 1600);
   }else{
     btn.classList.add('no'); btn.disabled = true;
     wrong();
@@ -1006,7 +994,8 @@ function nextMini(){
         mLock = true; if(!mMiss) mFirst++;
         b.classList.add('ok'); tone([523, 659, 784]);
         $('mMsg').textContent = 'صحيح! ' + NAMES[mN];
-        celebrate(mN, 1500, nextMini);
+        praise();
+        mTimer = setTimeout(nextMini, 1700);
       }else{
         mMiss = true;
         b.classList.add('no'); b.disabled = true; wrong();
