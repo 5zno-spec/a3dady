@@ -1,11 +1,10 @@
 /* يعمل التطبيق بلا إنترنت: تُخزَّن الملفات عند أول زيارة ثم تُقدَّم من الجهاز */
-const VERSION = 'v41';
+const VERSION = 'v37';
 const CACHE = 'arabic-numbers-' + VERSION;
 const CORE = [
   './', 'index.html', 'manifest.webmanifest',
   'img/logo.webp', 'img/favicon-32.png', 'img/apple-touch-icon.png', 'img/icon-192.png', 'img/icon-512.png', 'img/icon-maskable-192.png', 'img/icon-maskable-512.png',
-  ...Array.from({length: 51}, (_, i) => 'audio/' + i + '.mp3'),
-  ...[1,2,3,4,5].map(i => 'audio/praise/' + i + '.mp3'),
+  ...Array.from({length: 11}, (_, i) => 'audio/' + i + '.mp3'),   // أصوات الأرقام ٠ – ١٠
   ...['seed','faucet','watering-can','shower','tree','house','rocket','backpack','net','gift','comb','candle','frog','key','fish','brush'].map(s => 'img/shapes/' + s + '.webp')
 ];
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
