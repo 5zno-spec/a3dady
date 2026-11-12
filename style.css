@@ -258,9 +258,17 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .stat b{font-family:'Tajawal','Cairo',sans-serif;font-weight:700;font-size:1.05rem;white-space:nowrap}
 .pbar{flex:1;min-width:0;height:6px;border-radius:999px;background:rgba(255,255,255,.65);overflow:hidden}
 .pbar i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#A78BFA,#7C3AED);transition:width .4s}
-/* مربع الأشكال بنفس عرض مربع الأشكال في تعلّم، وبلا خلفية */
-.play{width:calc((100% - 10px) / 2);margin:0 auto}
+/* تقسيم الشاشة: مربع العرض يأخذ نحو ثلثي المساحة، والثلث الأخير للسؤال والاختيارات.
+   ارتفاع اللعبة = ارتفاع الشاشة ناقص الشريط العلوي (حجم الشعار) والحواف */
+#round{height:calc(100dvh - 72px - clamp(52px,16vw,92px));min-height:440px;display:flex;flex-direction:column}
+#round .toprow{flex:none}
+#round .stage{flex:0 1 61%;min-height:0;aspect-ratio:1;align-self:center;max-width:calc(100% - 20px);margin:10px 10px 18px;display:grid;place-items:center;container-type:size}
+/* المربع أكبر ما يمكن داخل مساحته (يأخذ الأصغر من العرض والارتفاع) */
+.play{width:min(100cqw,100cqh);margin:0}
 #qthings{background:none;border:0;box-shadow:none}
+/* السؤال والاختيارات في منتصف الثلث الأخير */
+#round .q{margin-top:auto}
+#round .msg{margin-bottom:auto}
 /* أزرار الإجابة بنفس شكل مربعات الأرقام */
 .choices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .choice{
