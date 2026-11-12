@@ -1,0 +1,452 @@
+/* ===== الأساس ===== */
+:root{
+  --sky:#DDF1FF; --ink:#17304D; --sun:#FFC83D; --coral:#FF6B5E;
+  --mint:#2BB98F; --white:#FFFFFF; --shadow:#17304D;
+  --scene:linear-gradient(180deg,#8FD3F8 0%,#BDE8FB 42%,#D5F2D0 72%,#8ED17C 100%);
+  --check:#2BB98F url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5.5 12.5l4.2 4.2L18.5 7.8' fill='none' stroke='%23fff' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/72% no-repeat;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+html{scrollbar-gutter:stable}   /* عرض ثابت للصفحات حتى لو ظهر شريط التمرير */
+body{
+  font-family:'Cairo',system-ui,sans-serif; font-weight:600;
+  background:var(--sky); color:var(--ink);
+  display:flex; flex-direction:column; align-items:center;
+  padding:16px 14px 28px; min-height:100%;
+}
+:focus-visible{outline:4px solid var(--coral);outline-offset:3px}
+.hidden{display:none!important}
+
+/* ===== سماء بتدرج نحو الأخضر + سحب متحركة وتلال ===== */
+.sky{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:var(--scene)}
+.cloud{position:absolute;top:var(--t);left:var(--x);width:var(--w);height:calc(var(--w) * .28);
+  background:#fff;border-radius:999px;opacity:.92;
+  animation:drift var(--d) linear var(--o) infinite}
+.cloud::before,.cloud::after{content:"";position:absolute;background:#fff;border-radius:50%}
+.cloud::before{width:42%;height:150%;left:14%;top:-70%}
+.cloud::after{width:32%;height:120%;right:16%;top:-45%}
+@keyframes drift{
+  from{transform:translateX(calc(-1 * var(--x) - 320px))}
+  to{transform:translateX(calc(100vw - var(--x) + 80px))}}
+.hill{position:absolute;border-radius:50%}
+.h1{width:90vw;height:34vh;left:-25vw;bottom:-20vh;background:#6CC24A}
+.h2{width:100vw;height:30vh;right:-30vw;bottom:-18vh;background:#52B04A}
+
+/* ===== الأزرار =====
+   .tab كبسولة ناعمة بلا إطار، و.btn كبسولة بإطار داكن وظل صلب */
+.tab,.btn{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;
+  font:inherit;font-weight:800;font-size:1.15rem;cursor:pointer;
+  border-radius:999px;padding:8px 22px;
+  background:var(--white);color:var(--ink);
+  transition:transform .08s, box-shadow .08s;
+}
+.tab{border:0;box-shadow:none}
+.btn{border:3px solid var(--ink);box-shadow:0 4px 0 var(--shadow);font-size:1.3rem;padding:10px 28px}
+.tab:active{transform:scale(.96)}
+.btn:active{transform:translateY(4px);box-shadow:0 0 0 var(--shadow)}
+/* لمعة علوية على كل الأزرار */
+.tab::before,.btn::before,.num::before,.choice::before,.card::before{
+  content:"";position:absolute;inset:5px 14% auto 14%;height:32%;border-radius:999px;
+  background:linear-gradient(rgba(255,255,255,.7),rgba(255,255,255,0));pointer-events:none}
+.num::before,.choice::before{inset:3px 14% auto 14%}
+
+/* الأيقونات */
+.ic{width:1.3em;height:1.3em;flex:none;margin-inline-end:4px;display:inline-block;overflow:visible}
+.tab .ic{stroke-width:2.4;margin-inline-end:6px}
+.ic.ic-lg{width:1.5em;height:1.5em;margin:0}
+@keyframes wiggle{25%{transform:rotate(-16deg)}75%{transform:rotate(16deg)}}
+@media (hover:hover){.tab:hover .ic{animation:wiggle .5s}}
+
+/* ===== الشريط العلوي: الشعار (يعود للواجهة الرئيسية) وشكل الأرقام والصوت ===== */
+.top{width:100%;max-width:560px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 16px}
+.logo{line-height:0}
+.logo button{display:block;background:none;border:0;padding:0;cursor:pointer;line-height:0}
+.logo img{width:clamp(52px,16vw,92px);height:auto;filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 6px #fff);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.tabs{display:flex;align-items:center;gap:6px}
+.digits{display:flex;align-items:center;gap:4px}
+.dg{height:41px;min-width:46px;padding:0 10px;background:#fff;
+  font-family:'Lalezar','Cairo',sans-serif;font-weight:400;font-size:1.1rem;line-height:1}
+.dg[aria-pressed="true"]{background:linear-gradient(#FFE27A,#FFC83D)}
+#mute{padding:6px 9px;font-size:1.2rem;line-height:1;background:#D8F5E4}
+
+main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
+
+/* ===== بطاقات الأعداد: أول ما يظهر عند فتح قسم من أقسام الأعداد ===== */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:6px 8px 12px}
+.card{
+  position:relative;aspect-ratio:1;display:grid;place-items:center;cursor:pointer;
+  font-family:'Lalezar','Cairo',sans-serif;font-size:clamp(2.8rem,14vw,4.2rem);line-height:1.4;
+  background:var(--b,#fff);color:var(--ink);
+  border:2px solid var(--ink);border-radius:22px;box-shadow:0 4px 0 var(--shadow);
+  transition:transform .2s, box-shadow .2s, opacity .25s, filter .25s;
+}
+.cards .card:nth-child(6n+1){--b:#FF9FB0}
+.cards .card:nth-child(6n+2){--b:#FFC27A}
+.cards .card:nth-child(6n+3){--b:#FFE27A}
+.cards .card:nth-child(6n+4){--b:#8FE3A8}
+.cards .card:nth-child(6n+5){--b:#9CCBFF}
+.cards .card:nth-child(6n){--b:#C9B3FF}
+/* الأعداد التي لم يجتز الطفل اختبارها باهتة، والمجتازة بألوانها الكاملة وعليها علامة صح */
+.card:not(.done){opacity:.5;filter:saturate(.4)}
+@media (hover:hover){.card:hover{transform:translateY(-3px) rotate(-2deg)}}
+.card:active{transform:translateY(4px);box-shadow:0 0 0 var(--shadow)}
+.card.done::after{content:"";position:absolute;top:-10px;inset-inline-end:-8px;width:28px;height:28px;border-radius:50%;
+  background:var(--check);border:2px solid var(--ink);box-shadow:0 2px 0 rgba(23,48,77,.35)}
+/* قسم ٢١–٥٠ (٣٠ بطاقة): خمس بطاقات في الصف بأرقام أصغر قليلًا.
+   قسما ٠–١٠ و١١–٢٠ بنفس الحجم: ثلاث بطاقات كبيرة في الصف */
+.cards[data-sec="2"]{grid-template-columns:repeat(5,1fr);gap:10px}
+.cards[data-sec="2"] .card{font-size:clamp(1.7rem,8.5vw,2.8rem);border-radius:18px}
+.cards[data-sec="2"] .card.done::after{width:22px;height:22px;top:-8px;inset-inline-end:-6px}
+/* العدّ بالصوت: البطاقة التي تُنطق الآن تضيء وتكبر (حتى لو كانت باهتة) */
+.card.lit{opacity:1;filter:none;z-index:1;transform:scale(1.12);
+  box-shadow:0 0 0 4px #fff,0 0 0 8px var(--sun),0 10px 24px rgba(23,48,77,.3)}
+/* زر العدّ تحت اللوحة: أخضر للتشغيل، ويصير أحمر بأيقونة إيقاف أثناء العدّ */
+.count-row{display:flex;justify-content:center;margin:6px 0 12px}
+.tab#countBtn{background:linear-gradient(#5FDDB3,#2BB98F);color:#fff;padding:10px 30px;box-shadow:0 6px 16px rgba(43,185,143,.35)}
+.tab#countBtn .ic{margin:0;width:1.6em;height:1.6em}
+.tab#countBtn[aria-pressed="true"]{background:linear-gradient(#FF8A7E,var(--coral));box-shadow:0 6px 16px rgba(255,107,94,.35)}
+
+/* ===== إنجازاتي: شريط التقدم العام ثم صف لكل رقم بدرجته ===== */
+.ach-top{background:rgba(255,255,255,.82);border-radius:22px;padding:14px 16px 14px;margin:0 4px 14px;box-shadow:0 6px 18px rgba(23,48,77,.12)}
+.ach-title{font-family:'Lalezar','Cairo',sans-serif;font-size:1.7rem;line-height:1.4;text-align:center}
+.ach-line{display:flex;justify-content:space-between;align-items:baseline;font-weight:800;margin:4px 0 8px}
+.ach-line b{font-family:'Tajawal','Cairo',sans-serif;font-weight:700;font-size:1.3rem;color:#7C3AED}
+.ach-top .pbar,.ach-row .pbar{display:block;flex:none;background:rgba(23,48,77,.1)}
+.ach-top .pbar{height:14px}
+.ach-top .pbar i{transition:width .8s ease}
+.ach-sub{margin-top:10px;font-size:.85rem;font-weight:800;opacity:.7;text-align:center;line-height:1.8}
+.ach-list{display:flex;flex-direction:column;gap:8px;padding:0 4px 8px}
+.ach-sec{display:flex;justify-content:space-between;align-items:baseline;margin:10px 6px 0;font-weight:800;font-size:1rem}
+.ach-sec:first-child{margin-top:0}
+.ach-sec span{font-size:.85rem;opacity:.65}
+.ach-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;width:100%;
+  padding:8px 12px;border:0;border-radius:16px;background:rgba(255,255,255,.78);
+  font:inherit;color:inherit;text-align:start;cursor:pointer;transition:transform .08s}
+.ach-row:active{transform:scale(.98)}
+.ach-n{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
+  font-family:'Lalezar','Cairo',sans-serif;font-size:1.6rem;line-height:1.4;
+  background:var(--b);border:2px solid var(--ink);box-shadow:0 2px 0 var(--shadow)}
+.ach-row.todo .ach-n{background:#fff;color:rgba(23,48,77,.45);border-color:rgba(23,48,77,.2);box-shadow:none}
+.ach-mid{display:flex;flex-direction:column;gap:7px;min-width:0}
+.ach-name{font-weight:800;font-size:1rem;line-height:1.2}
+.ach-row .pbar{height:8px}
+.ach-row .pbar i{background:linear-gradient(90deg,#5FDDB3,#2BB98F)}
+.ach-score{min-width:66px;text-align:center;line-height:1.3}
+.ach-score b{display:block;font-family:'Tajawal','Cairo',sans-serif;font-weight:700;font-size:1.02rem}
+.ach-score i{font-style:normal;font-size:.9rem;color:rgba(23,48,77,.18)}
+.ach-score i.on{color:#FFB800}
+.ach-row.todo .ach-score{font-size:.75rem;font-weight:800;opacity:.55}
+
+/* ===== اللوحة الزجاجية ذات الإطار المتقطع ===== */
+.stage{
+  position:relative;padding:18px 14px 20px;margin:10px 10px 28px;text-align:center;
+  background:linear-gradient(135deg,rgba(255,255,255,.55),rgba(255,255,255,.22));
+  -webkit-backdrop-filter:blur(12px) saturate(1.4);backdrop-filter:blur(12px) saturate(1.4);
+  border:2px solid rgba(255,255,255,.8);border-radius:14px;
+  box-shadow:0 8px 24px rgba(23,48,77,.18),inset 0 1px 0 rgba(255,255,255,.9);
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.stage{background:rgba(255,255,255,.85)}}
+/* الإطار المتقطع: SVG حتى نتحكم بالمسافة بين الشرطات */
+.frame{position:absolute;inset:-10px;width:calc(100% + 20px);height:calc(100% + 20px);pointer-events:none;overflow:visible}
+.frame rect{width:calc(100% - 3px);height:calc(100% - 3px);fill:none;stroke:var(--ink);stroke-width:3;stroke-dasharray:10 16}
+.word{font-size:2rem;font-weight:800}
+.q{font-size:1.5rem;font-weight:800;text-align:center;margin-bottom:8px}
+.msg{min-height:2rem;text-align:center;font-size:1.3rem;font-weight:800;margin-top:14px}
+
+/* مربع الأشكال: تُرتَّب في شبكة تملأ المربع */
+.half{aspect-ratio:1;container-type:size;min-width:0}
+.shapes{display:grid;place-items:center;background:rgba(255,255,255,.4);border:2px solid rgba(255,255,255,.85);border-radius:10px;box-shadow:inset 0 0 12px rgba(255,255,255,.6)}
+.sg{width:90cqw;display:flex;flex-wrap:wrap;justify-content:center;align-content:center}
+.c{width:calc(100% / var(--c));height:calc(90cqw / var(--c));display:grid;place-items:center;
+  font-size:calc(90cqw / var(--c) * .8);line-height:1}
+.c img{width:88%;height:88%;object-fit:contain;pointer-events:none;-webkit-user-drag:none;user-select:none}
+/* الأعداد فوق العشرة:
+   بطاقات العشرات عمود واحد على اليسار (مرصوصة رأسيًا)، والآحاد على اليمين في أعمدة وصفوف.
+   المقاسات (--ch ارتفاع البطاقة، --cw عرضها، --us حجم شكل الآحاد، --oc عدد أعمدة الآحاد) يحسبها الجافا سكربت
+   لتكون أكبر ما يمكن داخل المربع */
+.tg{width:90cqw;height:90cqw;direction:ltr;display:flex;align-items:center;justify-content:center;gap:4cqw}
+.tcol{display:flex;flex-direction:column;gap:3cqw}
+.ten{position:relative;width:var(--cw);height:var(--ch);display:grid;place-items:center;
+  background:linear-gradient(#FFE89A,#FFC83D);border:.7cqw solid var(--ink);border-radius:calc(var(--ch) * .22);
+  box-shadow:0 .8cqw 0 rgba(23,48,77,.35)}
+/* الرقم ١٠ في منتصف البطاقة، والشكل صغير في زاويتها العليا اليسرى */
+.ten b{font-family:'Lalezar','Cairo',sans-serif;font-weight:400;font-size:calc(var(--ch) * .62);line-height:1;color:var(--ink);padding-top:calc(var(--ch) * .1)}
+.ten img{position:absolute;top:7%;left:5%;width:calc(var(--ch) * .36);height:calc(var(--ch) * .36);object-fit:contain}
+.ocol{direction:rtl;display:grid;grid-template-columns:repeat(var(--oc),var(--us));grid-auto-rows:var(--us)}
+.one{display:grid;place-items:center}
+.one img{width:88%;height:88%;object-fit:contain}
+.ten img,.one img{pointer-events:none;-webkit-user-drag:none;user-select:none}
+
+/* ===== تعلّم: الرقم واسمه بجانب الأشكال، ومربعات الأرقام في الأسفل ===== */
+#learn{flex:1;display:flex;flex-direction:column}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
+.numhalf{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1cqw}
+.big{font-family:'Lalezar','Cairo',sans-serif;font-size:66cqw;line-height:1.05;color:var(--coral)}
+.split .word{font-size:17cqw;line-height:1.2}
+.split .word.long{font-size:11cqw}   /* الأسماء الطويلة مثل «ثمانية وأربعون» */
+/* على الهاتف: مربع الأشكال في الأعلى بعرض الشاشة، والرقم واسمه تحته بعرض الشاشة */
+@media (max-width:600px){
+  .split{grid-template-columns:1fr}
+  .split .shapes{order:-1}
+  .split .numhalf{aspect-ratio:auto;container-type:inline-size;padding:1cqw 0 2cqw}
+  .split .big{font-size:34cqw}
+  .split .word{font-size:9cqw}
+  .split .word.long{font-size:7cqw}
+}
+/* ظهور لطيف للرقم عند التغيير، ورقصة هادئة بين الحين والآخر */
+#big{animation:bigDance 7s ease-in-out 2.5s infinite;transform-origin:50% 70%}
+#big .dn{display:inline-block;animation:bigPop .55s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes bigPop{0%{transform:scale(.5) rotate(-8deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes bigDance{
+  0%,70%,100%{transform:none}
+  74%{transform:rotate(-5deg) scale(1.05)}
+  78%{transform:rotate(5deg) translateY(-8px) scale(1.07)}
+  82%{transform:rotate(-4deg) translateY(0) scale(1.04)}
+  86%{transform:rotate(4deg) translateY(-5px) scale(1.05)}
+  90%{transform:rotate(-2deg) scale(1.02)}
+  94%{transform:none}
+}
+
+/* زرا تغيير الشكل والعب بهذا الرقم */
+.shape-row{display:flex;justify-content:center;gap:10px;margin:-8px 0 18px}
+.tab#shapeBtn,.tab#miniBtn{color:#fff;padding:8px 18px}
+.tab#shapeBtn{background:linear-gradient(#FF8A7E,var(--coral))}
+.tab#miniBtn{background:linear-gradient(#5FDDB3,#2BB98F)}
+.tab#shapeBtn .ic,.tab#miniBtn .ic{margin:0;width:1.5em;height:1.5em}
+
+/* مربعات الأرقام: صغيرة ومتراصة في أسفل صفحة التعلّم.
+   غير المحدد باهت، والمحدد غير المكتمل أبيض، والمكتمل ملوّن وعليه علامة صح */
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:auto}
+.grid[data-sec="1"]{grid-template-columns:repeat(5,1fr)}
+.num{
+  position:relative;cursor:pointer;
+  font-family:'Lalezar','Cairo',sans-serif;font-size:1.5rem;line-height:1.5;
+  background:var(--b,#fff);color:var(--ink);
+  border:2px solid var(--ink);border-radius:14px;padding:2px 0;
+  box-shadow:0 2px 0 var(--shadow);
+  transition:background .2s,color .2s,transform .08s;
+}
+.grid .num:nth-child(6n+1){--b:#FF9FB0}
+.grid .num:nth-child(6n+2){--b:#FFC27A}
+.grid .num:nth-child(6n+3){--b:#FFE27A}
+.grid .num:nth-child(6n+4){--b:#8FE3A8}
+.grid .num:nth-child(6n+5){--b:#9CCBFF}
+.grid .num:nth-child(6n){--b:#C9B3FF}
+.num:not([aria-pressed="true"]){background:rgba(255,255,255,.6);color:rgba(23,48,77,.5);border-color:rgba(23,48,77,.18);box-shadow:none}
+.num[aria-pressed="true"]{background:var(--b);transform:scale(1.08)}
+.num[aria-pressed="true"]:not(.done){background:#fff}
+@media (hover:hover){
+  .num:hover:not([aria-pressed="true"]){transform:translateY(-3px) rotate(-2deg);background:rgba(255,255,255,.85);color:var(--ink)}
+}
+.num.done:not([aria-pressed="true"]){background:var(--b);color:var(--ink);border-color:var(--ink);box-shadow:0 2px 0 var(--shadow)}
+.num:active{transform:translateY(4px)!important}
+.num.done::after{content:"";position:absolute;top:-9px;inset-inline-end:-6px;width:18px;height:18px;border-radius:50%;
+  background:var(--check);border:2px solid var(--ink);box-shadow:0 2px 0 rgba(23,48,77,.35)}
+@media (max-width:380px){.num{font-size:1.35rem}}
+
+/* ===== العب مع الأعداد ===== */
+/* مربعا النقاط والسؤال مع شريطي تقدم */
+.toprow{display:flex;align-items:stretch;gap:6px;margin:0 0 14px}
+.stats{flex:1;display:flex;gap:6px}
+.stat{flex:1;display:flex;align-items:center;align-content:center;justify-content:center;column-gap:4px;
+  padding:3px 9px;border-radius:10px;background:rgba(255,255,255,.7);text-align:center;line-height:1.2}
+.stat:nth-child(2){flex:1.7}
+.stat .lbl{font-size:.7rem;font-weight:800;opacity:.65;white-space:nowrap}
+.stat b{font-family:'Tajawal','Cairo',sans-serif;font-weight:700;font-size:1.05rem;white-space:nowrap}
+.pbar{flex:1;min-width:0;height:6px;border-radius:999px;background:rgba(255,255,255,.65);overflow:hidden}
+.pbar i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#A78BFA,#7C3AED);transition:width .4s}
+/* مربع الأشكال بنفس عرض مربع الأشكال في تعلّم، وبلا خلفية */
+.play{width:calc((100% - 10px) / 2);margin:0 auto}
+#qthings{background:none;border:0;box-shadow:none}
+/* أزرار الإجابة بنفس شكل مربعات الأرقام */
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.choice{
+  position:relative;cursor:pointer;
+  font-family:'Lalezar','Cairo',sans-serif;font-size:2.8rem;line-height:1.5;
+  background:var(--b,#fff);color:var(--ink);
+  border:2px solid var(--ink);border-radius:14px;padding:2px 0;
+  box-shadow:0 2px 0 var(--shadow);
+  transition:transform .08s, box-shadow .08s;
+}
+.choice:nth-child(3n+1){--b:#8FE3A8}
+.choice:nth-child(3n+2){--b:#FFC27A}
+.choice:nth-child(3n){--b:#9CCBFF}
+.choice.ok{background:var(--mint);color:#fff}
+/* الإجابة الخاطئة: أحمر واضح مع اهتزاز بسيط */
+.choice.no{background:#FF5A4E;color:#fff;border-color:#C9372C;box-shadow:0 2px 0 #C9372C;animation:shake .45s ease-in-out}
+.choice:disabled{cursor:default}
+@media (hover:hover){.choice:hover:not(:disabled){transform:translateY(-3px) rotate(-2deg)}}
+.choice:active{transform:translateY(4px)!important;box-shadow:none}
+@keyframes shake{
+  0%,100%{transform:none}
+  20%{transform:translateX(-7px) rotate(-2deg)}
+  40%{transform:translateX(6px) rotate(2deg)}
+  60%{transform:translateX(-4px) rotate(-1deg)}
+  80%{transform:translateX(3px) rotate(1deg)}
+}
+/* النتيجة وشاشة «تعلّم أولًا» */
+.result{text-align:center}
+.stars{font-size:3rem;margin:8px 0}
+.result .btn{margin-top:10px;background:var(--sun)}
+
+/* ===== لعبة الرقم المحدد (اختبار الرقم) ===== */
+#mini{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;padding:16px 14px 28px;overflow:auto;background:var(--scene)}
+.m-in{width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:14px}
+/* شريط الاختبار العلوي فوق نافذة النتيجة، فتبقى علامة الإغلاق قابلة للضغط في كل وقت */
+.m-top{width:100%;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:6}
+.m-count{font-weight:800;font-size:1.1rem}
+.tab#mClose{padding:8px 12px;background:#fff}
+.tab#mClose .ic{margin:0}
+.m-num{font-family:'Lalezar','Cairo',sans-serif;font-size:6.5rem;line-height:1.4;color:var(--coral)}
+.m-q{font-size:1.4rem;font-weight:800;text-align:center}
+.m-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+.mcard{font:inherit;color:inherit;cursor:pointer;padding:0;transition:background .2s,transform .12s}
+.mcard:active{transform:scale(.97)}
+.mcard.ok{background:rgba(43,185,143,.5)}
+.mcard.no{background:rgba(255,90,78,.5);border-color:#FF5A4E;animation:shake .45s ease-in-out}
+.mcard:disabled{cursor:default}
+/* على الهاتف: مربعان في الصف الأول والثالث في المنتصف تحتهما، فتكبر المربعات والأشكال بدل ثلاثة صغيرة متجاورة */
+@media (max-width:600px){
+  .m-in{gap:10px}
+  .m-num{font-size:4.6rem;line-height:1.3}
+  .m-q{font-size:1.25rem}
+  .m-cards{grid-template-columns:repeat(2,1fr);gap:12px}
+  .m-cards .mcard:last-child:nth-child(odd){grid-column:1 / -1;justify-self:center;width:calc(50% - 6px)}
+  #mini .msg{margin-top:4px}
+}
+
+/* نافذة إتمام الاختبار: أحسنت، النجوم والدرجة، عدّاد ٣ ثوانٍ، وزرا الإعادة والرقم التالي */
+.m-res{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:20px;
+  background:rgba(23,48,77,.3);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  animation:insFade .25s ease both}
+.m-res-card{width:min(84vw,320px);padding:24px 22px 22px;display:flex;flex-direction:column;align-items:center;gap:8px;
+  border-radius:28px;background:#fff;box-shadow:0 18px 44px rgba(23,48,77,.28);text-align:center;
+  animation:insPop .45s cubic-bezier(.2,1.4,.4,1) both}
+.m-res-card .word{font-size:2.2rem;line-height:1.3}
+.m-res-card .stars{font-size:2.3rem;line-height:1.2;margin:0}
+.m-res-card .m-q{font-size:1.1rem;opacity:.75;line-height:1.7}
+/* العدّاد: حلقة تتناقص خلال ٣ ثوانٍ وفي وسطها الثواني المتبقية */
+.cd{position:relative;width:60px;height:60px;margin:6px 0 4px}
+.cd svg{width:100%;height:100%;transform:rotate(-90deg)}
+.cd circle{fill:none;stroke-width:5}
+.cd-bg{stroke:rgba(23,48,77,.1)}
+.cd-ring{stroke:#7C3AED;stroke-linecap:round;stroke-dasharray:138.23;stroke-dashoffset:0}
+.cd-ring.run{animation:cdRun 3s linear forwards}
+@keyframes cdRun{to{stroke-dashoffset:138.23}}
+.cd span{position:absolute;inset:0;display:grid;place-items:center;font-family:'Tajawal','Cairo',sans-serif;font-weight:700;font-size:1.45rem;color:#7C3AED}
+.m-btns{display:flex;gap:16px;margin-top:6px}
+.tab.rbtn{width:60px;height:60px;padding:0}
+.tab.rbtn .ic{margin:0;width:1.7em;height:1.7em}
+#mAgain{background:#EEF2F7;color:var(--ink)}
+#mNext{background:linear-gradient(#6EE3BD,#2BB98F);color:#fff;box-shadow:0 6px 16px rgba(43,185,143,.4)}
+/* لم يجتز الاختبار: زر الإعادة هو الزر الأساسي الملوّن */
+.m-res-card.fail #mAgain{background:linear-gradient(#FFB36B,#FF8A3D);color:#fff;box-shadow:0 6px 16px rgba(255,138,61,.4)}
+
+/* ===== فقاعة التشجيع عند الإجابة الصحيحة (تظهر مع صوت العبارة ثم تختفي) ===== */
+.praise{position:fixed;left:50%;top:22%;z-index:80;pointer-events:none;
+  padding:10px 28px;border-radius:28px;background:#fff;color:var(--mint);
+  border:3px solid var(--mint);box-shadow:0 10px 28px rgba(23,48,77,.22);
+  font-family:'Lalezar','Cairo',sans-serif;font-size:2.1rem;line-height:1.45;white-space:nowrap;
+  transform:translateX(-50%);animation:praisePop 1.5s cubic-bezier(.2,1.4,.4,1) both}
+/* ذيل الفقاعة */
+.praise::after{content:"";position:absolute;bottom:-11px;left:50%;width:18px;height:18px;background:#fff;
+  border:3px solid var(--mint);border-top:0;border-left:0;border-radius:0 0 5px 0;transform:translateX(-50%) rotate(45deg)}
+@keyframes praisePop{
+  0%{opacity:0;transform:translate(-50%,18px) scale(.5)}
+  16%{opacity:1;transform:translate(-50%,0) scale(1.08)}
+  26%{transform:translate(-50%,0) scale(1)}
+  80%{opacity:1;transform:translate(-50%,0) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-14px) scale(.96)}
+}
+
+/* ===== نافذة «هل أتممت دراسة الرقم؟» ===== */
+#ask{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:20px;
+  background:rgba(23,48,77,.3);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  animation:insFade .25s ease both}
+.ask-card{position:relative;width:min(84vw,320px);padding:44px 22px 18px;display:flex;flex-direction:column;align-items:center;gap:20px;
+  border-radius:28px;background:#fff;box-shadow:0 18px 44px rgba(23,48,77,.28);text-align:center;
+  animation:insPop .45s cubic-bezier(.2,1.4,.4,1) both}
+.ask-q{font-size:1.35rem;font-weight:800;line-height:1.7}
+.ask-q b{font-family:'Lalezar','Cairo',sans-serif;font-weight:400;font-size:1.7em;color:var(--coral);vertical-align:-.12em}
+.tab#askTest{background:linear-gradient(#6EE3BD,#2BB98F);color:#fff;padding:10px 28px;box-shadow:0 6px 16px rgba(43,185,143,.4)}
+.tab#askTest:active{transform:scale(.96);box-shadow:0 3px 8px rgba(43,185,143,.35)}
+/* «ليس الآن»: زر نصي هادئ تحت الزر الأخضر */
+.tab#askSkip{background:none;color:rgba(23,48,77,.6);font-size:1rem;padding:6px 18px;margin-top:-12px}
+.tab#askSkip::before{display:none}
+
+/* ===== شاشة التحميل ===== */
+#splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;
+  background:var(--scene);transition:opacity .6s}
+#splash.out{opacity:0;pointer-events:none}
+/* will-change: يرسم المتصفح الشعار بظلّه مرة واحدة ثم يحرّكه على معالج الرسومات دون إعادة رسم */
+.sp-logo{width:min(62vw,280px);height:auto;will-change:transform;
+  filter:drop-shadow(0 0 8px #fff) drop-shadow(0 0 22px rgba(255,255,255,.9));
+  animation:spPop .8s cubic-bezier(.2,1.4,.4,1) both,spFloat 2.2s ease-in-out .8s infinite}
+@keyframes spPop{from{transform:scale(.3) rotate(-12deg);opacity:0}to{transform:none;opacity:1}}
+/* يبدأ الطفو من نفس الوضع الذي تنتهي عنده القفزة حتى لا يقفز الشعار فجأة */
+@keyframes spFloat{0%,100%{transform:none}50%{transform:translateY(-14px) scale(1.07) rotate(2deg)}}
+.sp-track{width:min(62vw,280px);height:14px;border-radius:999px;background:rgba(255,255,255,.65);overflow:hidden}
+/* شريط التقدم ينزلق من اليمين بحركة CSS خلال ٥ ثوانٍ بدل تغيير العرض بالجافا سكربت في كل إطار */
+.sp-fill{width:100%;height:100%;border-radius:999px;background:linear-gradient(90deg,#A78BFA,#7C3AED);
+  transform:translateX(100%);will-change:transform;animation:spFill 5s linear forwards}
+@keyframes spFill{to{transform:none}}
+/* أثناء شاشة التحميل تتوقف حركات ما خلفها (السحب وبريق الشعار وتوهّجه) ليبقى الجهاز متفرغًا لحركة الشعار */
+.loading > :not(#splash),.loading > :not(#splash) *,.loading .hl::after,.loading .cloud::before,.loading .cloud::after{animation-play-state:paused!important}
+
+/* ===== الواجهة الرئيسية: شعار يلمع وتحته الأقسام ===== */
+#home{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;
+  padding:20px 18px;overflow:auto;background:var(--scene)}
+.hl{position:relative;width:min(58vw,250px);flex:none}
+.hl img{display:block;width:100%;height:auto;animation:hGlow 2.6s ease-in-out infinite}
+@keyframes hGlow{
+  0%,100%{filter:drop-shadow(0 0 6px #fff) drop-shadow(0 0 14px rgba(255,255,255,.7));transform:scale(1)}
+  50%{filter:drop-shadow(0 0 10px #fff) drop-shadow(0 0 28px rgba(255,255,255,.95));transform:scale(1.04)}}
+/* بريق يمرّ فوق الشعار */
+.hl::after{content:"";position:absolute;inset:0;pointer-events:none;
+  -webkit-mask:url(img/logo.webp) center/contain no-repeat;mask:url(img/logo.webp) center/contain no-repeat;
+  background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.95) 50%,transparent 62%);
+  background-size:260% 100%;background-position:170% 0;animation:hSweep 3.2s ease-in-out infinite}
+@keyframes hSweep{0%,25%{background-position:170% 0}75%,100%{background-position:-70% 0}}
+.spark{position:absolute;color:#fff;font-size:1.5rem;line-height:1;text-shadow:0 0 8px #fff,0 0 16px #FFC83D;
+  opacity:0;animation:twinkle 2.4s ease-in-out infinite;pointer-events:none}
+.spark:nth-of-type(1){top:2%;inset-inline-start:2%}
+.spark:nth-of-type(2){top:14%;inset-inline-end:-4%;font-size:1.1rem;animation-delay:.8s}
+.spark:nth-of-type(3){bottom:6%;inset-inline-start:-6%;font-size:1.2rem;animation-delay:1.5s}
+.spark:nth-of-type(4){bottom:0;inset-inline-end:6%;animation-delay:.4s}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(.4) rotate(0)}50%{opacity:1;transform:scale(1.15) rotate(30deg)}}
+.hmenu{display:flex;flex-direction:column;gap:14px;width:min(80vw,320px)}
+.hbtn{width:100%;padding:12px 20px;font-size:1.3rem;white-space:nowrap;gap:.35em}
+.hbtn.h1b{background:linear-gradient(#5FDDB3,#2BB98F)}
+.hbtn.h2b{background:linear-gradient(#FFE27A,#FFC83D)}
+.hbtn.h3b{background:linear-gradient(#FF9E94,#FF6B5E)}
+.hbtn.h4b{background:linear-gradient(#B7D8FF,#8CBFFF)}
+.hbtn.h5b{background:linear-gradient(#DCCBFF,#B79CFF)}
+.hbtn:disabled{opacity:.4;filter:saturate(.5);cursor:default}
+.hbtn:disabled:active{transform:none;box-shadow:0 4px 0 var(--shadow)}
+
+/* ===== نافذة تثبيت التطبيق: زجاج مصنفر شبه معتم، وما خلفها مضبّب ===== */
+#install{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:20px;
+  background:rgba(23,48,77,.3);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  animation:insFade .3s ease both}
+.ins-card{position:relative;width:min(78vw,290px);padding:40px 22px 26px;display:flex;flex-direction:column;align-items:center;gap:22px;
+  border-radius:30px;background:linear-gradient(160deg,rgba(255,255,255,.93),rgba(236,248,255,.86));
+  border:1.5px solid rgba(255,255,255,.95);
+  box-shadow:0 18px 44px rgba(23,48,77,.28),inset 0 1px 0 #fff;
+  animation:insPop .5s cubic-bezier(.2,1.4,.4,1) both}
+.ins-card img{width:min(42vw,150px);height:auto}
+.tab#insBtn{background:linear-gradient(#6EE3BD,#2BB98F);color:#fff;padding:10px 28px;gap:6px;
+  box-shadow:0 6px 16px rgba(43,185,143,.4)}
+.tab#insBtn .ic{margin:0;width:1.25em;height:1.25em}
+.tab#insBtn:active{transform:scale(.96);box-shadow:0 3px 8px rgba(43,185,143,.35)}
+/* علامة الإغلاق الصغيرة في زاوية النوافذ */
+.tab#insClose,.tab#askClose{position:absolute;top:12px;inset-inline-end:12px;width:34px;height:34px;padding:0;background:rgba(23,48,77,.07);color:rgba(23,48,77,.7)}
+.tab#insClose::before,.tab#askClose::before{display:none}
+.tab#insClose .ic,.tab#askClose .ic{margin:0;width:1.1em;height:1.1em}
+@keyframes insFade{from{opacity:0}to{opacity:1}}
+@keyframes insPop{from{transform:scale(.6) translateY(30px);opacity:0}to{transform:none;opacity:1}}
+
+/* ===== شاشات صغيرة وتقليل الحركة ===== */
+@media (max-width:375px){.top{gap:6px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
