@@ -210,11 +210,18 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .choice:nth-child(3n+2){--b:#FFC27A}
 .choice:nth-child(3n){--b:#9CCBFF}
 .choice.ok{background:var(--mint);color:#fff}
-.choice.no{background:var(--coral);color:#fff;animation:shake .35s}
+/* الإجابة الخاطئة: أحمر واضح مع اهتزاز بسيط */
+.choice.no{background:#FF5A4E;color:#fff;border-color:#C9372C;box-shadow:0 2px 0 #C9372C;animation:shake .45s ease-in-out}
 .choice:disabled{cursor:default}
 @media (hover:hover){.choice:hover:not(:disabled){transform:translateY(-3px) rotate(-2deg)}}
 .choice:active{transform:translateY(4px)!important;box-shadow:none}
-@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes shake{
+  0%,100%{transform:none}
+  20%{transform:translateX(-7px) rotate(-2deg)}
+  40%{transform:translateX(6px) rotate(2deg)}
+  60%{transform:translateX(-4px) rotate(-1deg)}
+  80%{transform:translateX(3px) rotate(1deg)}
+}
 /* النتيجة وشاشة «تعلّم أولًا» */
 .result{text-align:center}
 .stars{font-size:3rem;margin:8px 0}
@@ -233,7 +240,7 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .mcard{font:inherit;color:inherit;cursor:pointer;padding:0;transition:background .2s,transform .12s}
 .mcard:active{transform:scale(.97)}
 .mcard.ok{background:rgba(43,185,143,.5)}
-.mcard.no{background:rgba(255,107,94,.4);animation:shake .35s}
+.mcard.no{background:rgba(255,90,78,.5);border-color:#FF5A4E;animation:shake .45s ease-in-out}
 .mcard:disabled{cursor:default}
 .m-btns{display:flex;gap:10px;margin-top:6px}
 #mAgain{background:linear-gradient(#5FDDB3,#2BB98F);color:#fff;padding:10px 26px}
@@ -453,17 +460,43 @@ function persist(){
 
 /* صوت */
 let actx, muted = !!store.muted;
+function audioCtx(){
+  actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+  if(actx.state === 'suspended') actx.resume();   // ضروري على آيفون حتى تُسمع النغمات
+  return actx;
+}
 function tone(freqs){
   if(muted) return;
   try{
-    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    const ac = audioCtx();
     freqs.forEach((f,i)=>{
-      const o = actx.createOscillator(), g = actx.createGain();
+      const o = ac.createOscillator(), g = ac.createGain();
       o.frequency.value = f; o.type = 'triangle';
-      g.gain.setValueAtTime(.18, actx.currentTime + i*.12);
-      g.gain.exponentialRampToValueAtTime(.001, actx.currentTime + i*.12 + .25);
-      o.connect(g); g.connect(actx.destination);
-      o.start(actx.currentTime + i*.12); o.stop(actx.currentTime + i*.12 + .28);
+      g.gain.setValueAtTime(.18, ac.currentTime + i*.12);
+      g.gain.exponentialRampToValueAtTime(.001, ac.currentTime + i*.12 + .25);
+      o.connect(g); g.connect(ac.destination);
+      o.start(ac.currentTime + i*.12); o.stop(ac.currentTime + i*.12 + .28);
+    });
+  }catch(e){}
+}
+/* صوت الخطأ: نغمتان هابطتان مميّزتان (بُوبُوو)، واهتزاز خفيف للهاتف حيث يُدعم */
+function wrong(){
+  try{ if(navigator.vibrate) navigator.vibrate(90); }catch(e){}
+  if(muted) return;
+  try{
+    const ac = audioCtx(), t = ac.currentTime;
+    [[330, 0, .16], [220, .17, .3]].forEach(([f, d, len]) => {
+      const o = ac.createOscillator(), lp = ac.createBiquadFilter(), g = ac.createGain();
+      o.type = 'square';
+      o.frequency.setValueAtTime(f, t + d);
+      o.frequency.exponentialRampToValueAtTime(f * .88, t + d + len);
+      lp.type = 'lowpass'; lp.frequency.value = 1400;      // ينعّم خشونة الموجة المربعة
+      g.gain.setValueAtTime(.0001, t + d);
+      g.gain.exponentialRampToValueAtTime(.2, t + d + .02);
+      g.gain.setValueAtTime(.2, t + d + len - .06);
+      g.gain.exponentialRampToValueAtTime(.001, t + d + len);
+      o.connect(lp); lp.connect(g); g.connect(ac.destination);
+      o.start(t + d); o.stop(t + d + len + .02);
     });
   }catch(e){}
 }
@@ -615,7 +648,7 @@ function choose(btn, n){
     setTimeout(nextQ, 1300);
   }else{
     btn.classList.add('no'); btn.disabled = true;
-    tone([220]);
+    wrong();
     $('msg').textContent = 'حاول مرة أخرى';
   }
 }
@@ -711,7 +744,7 @@ function nextMini(){
         setTimeout(() => speak(mN), 500);
         mTimer = setTimeout(nextMini, 1500);
       }else{
-        b.classList.add('no'); b.disabled = true; tone([220]);
+        b.classList.add('no'); b.disabled = true; wrong();
         $('mMsg').textContent = 'حاول مرة أخرى';
       }
     };
