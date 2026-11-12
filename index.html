@@ -122,6 +122,34 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .card.done::after{content:"";position:absolute;top:-10px;inset-inline-end:-8px;width:28px;height:28px;border-radius:50%;
   background:var(--check);border:2px solid var(--ink);box-shadow:0 2px 0 rgba(23,48,77,.35)}
 
+/* ===== إنجازاتي: شريط التقدم العام ثم صف لكل رقم بدرجته ===== */
+.ach-top{background:rgba(255,255,255,.82);border-radius:22px;padding:14px 16px 14px;margin:0 4px 14px;box-shadow:0 6px 18px rgba(23,48,77,.12)}
+.ach-title{font-family:'Lalezar','Cairo',sans-serif;font-size:1.7rem;line-height:1.4;text-align:center}
+.ach-line{display:flex;justify-content:space-between;align-items:baseline;font-weight:800;margin:4px 0 8px}
+.ach-line b{font-family:'Tajawal','Cairo',sans-serif;font-weight:700;font-size:1.3rem;color:#7C3AED}
+.ach-top .pbar,.ach-row .pbar{display:block;flex:none;background:rgba(23,48,77,.1)}
+.ach-top .pbar{height:14px}
+.ach-top .pbar i{transition:width .8s ease}
+.ach-sub{margin-top:10px;font-size:.85rem;font-weight:800;opacity:.7;text-align:center;line-height:1.8}
+.ach-list{display:flex;flex-direction:column;gap:8px;padding:0 4px 8px}
+.ach-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;width:100%;
+  padding:8px 12px;border:0;border-radius:16px;background:rgba(255,255,255,.78);
+  font:inherit;color:inherit;text-align:start;cursor:pointer;transition:transform .08s}
+.ach-row:active{transform:scale(.98)}
+.ach-n{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
+  font-family:'Lalezar','Cairo',sans-serif;font-size:1.6rem;line-height:1.4;
+  background:var(--b);border:2px solid var(--ink);box-shadow:0 2px 0 var(--shadow)}
+.ach-row.todo .ach-n{background:#fff;color:rgba(23,48,77,.45);border-color:rgba(23,48,77,.2);box-shadow:none}
+.ach-mid{display:flex;flex-direction:column;gap:7px;min-width:0}
+.ach-name{font-weight:800;font-size:1rem;line-height:1.2}
+.ach-row .pbar{height:8px}
+.ach-row .pbar i{background:linear-gradient(90deg,#5FDDB3,#2BB98F)}
+.ach-score{min-width:66px;text-align:center;line-height:1.3}
+.ach-score b{display:block;font-family:'Tajawal','Cairo',sans-serif;font-weight:700;font-size:1.02rem}
+.ach-score i{font-style:normal;font-size:.9rem;color:rgba(23,48,77,.18)}
+.ach-score i.on{color:#FFB800}
+.ach-row.todo .ach-score{font-size:.75rem;font-weight:800;opacity:.55}
+
 /* ===== اللوحة الزجاجية ذات الإطار المتقطع ===== */
 .stage{
   position:relative;padding:18px 14px 20px;margin:10px 10px 28px;text-align:center;
@@ -324,6 +352,7 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .hbtn.h2b{background:linear-gradient(#FFE27A,#FFC83D)}
 .hbtn.h3b{background:linear-gradient(#FF9E94,#FF6B5E)}
 .hbtn.h4b{background:linear-gradient(#B7D8FF,#8CBFFF)}
+.hbtn.h5b{background:linear-gradient(#DCCBFF,#B79CFF)}
 .hbtn:disabled{opacity:.4;filter:saturate(.5);cursor:default}
 .hbtn:disabled:active{transform:none;box-shadow:0 4px 0 var(--shadow)}
 
@@ -374,6 +403,7 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
     <button class="btn hbtn h2b" disabled>الأعداد <span dir="ltr">(11 - 20)</span></button>
     <button class="btn hbtn h3b" disabled>الأعداد <span dir="ltr">(21 - 50)</span></button>
     <button class="btn hbtn h4b" id="hb4">العب مع الأعداد</button>
+    <button class="btn hbtn h5b" id="hb5">إنجازاتي</button>
   </nav>
 </div>
 <header class="top">
@@ -391,6 +421,17 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
   <!-- بطاقات الأعداد -->
   <section id="cards" class="hidden">
     <div class="cards" id="cardGrid"></div>
+  </section>
+
+  <!-- إنجازاتي -->
+  <section id="ach" class="hidden">
+    <div class="ach-top">
+      <div class="ach-title">إنجازاتي</div>
+      <div class="ach-line"><span id="achDone"></span><span id="achPct"></span></div>
+      <div class="pbar" role="progressbar" aria-label="نسبة الإنجاز" aria-valuemin="0" aria-valuemax="100" id="achBar"><i id="achFill"></i></div>
+      <div class="ach-sub" id="achPts"></div>
+    </div>
+    <div class="ach-list" id="achList"></div>
   </section>
 
   <!-- تعلّم -->
@@ -448,6 +489,8 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
     </div>
     <div id="mResult" class="m-in hidden">
       <div class="word">أحسنت!</div>
+      <div class="stars" id="mStars"></div>
+      <div class="m-q" id="mScore"></div>
       <div class="m-btns"><button class="tab" id="mAgain">مرة أخرى</button><button class="tab" id="mBack">رجوع</button></div>
     </div>
   </div>
@@ -477,6 +520,7 @@ let digits = 'ar';   // 'ar' = ٠١٢٣ ، 'en' = 0123
 const fmt = n => digits === 'ar' ? String(n).split('').map(d => AR[+d]).join('') : String(n);
 const fmtH = n => fmt(n);
 const NAMES = ['صفر','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة'];
+const PAL = ['#FF9FB0','#FFC27A','#FFE27A','#8FE3A8','#9CCBFF','#C9B3FF'];   // ألوان الأرقام بالترتيب
 /* الأشكال صور في img/shapes (الاسم هو اسم الملف) */
 const EMOJI = ['seed','faucet','watering-can','shower','tree','house','rocket','backpack','net','gift','comb','candle','frog','key','fish','brush'];
 EMOJI.forEach(id => { new Image().src = 'img/shapes/' + id + '.webp'; });
@@ -494,12 +538,23 @@ const okIdx = a => Array.isArray(a) && a.length === 11 && a.every(v => Number.is
 const shapeIdx = okIdx(store.shapeIdx) ? store.shapeIdx.slice() : Array(11).fill(0);
 /* الأرقام التي أنهى الطفل اختبارها: لعبة «العب مع الأعداد» لا تتجاوزها */
 const studied = new Set(Array.isArray(store.learned) ? store.learned.filter(n => Number.isInteger(n) && n >= 0 && n <= 10) : []);
+/* درجات اختبار كل رقم: best أفضل درجة (من ٥)، last آخر درجة، tries عدد مرات الاختبار، date آخر مرة */
+const MROUNDS = 5;
+const stats = {};
+if(store.stats && typeof store.stats === 'object'){
+  for(const k in store.stats){
+    const n = +k, s = store.stats[k];
+    if(Number.isInteger(n) && n >= 0 && n <= 10 && s && Number.isInteger(s.best) && s.best >= 0 && s.best <= MROUNDS){
+      stats[n] = {best: s.best, last: Number.isInteger(s.last) ? s.last : s.best, tries: Number.isInteger(s.tries) ? s.tries : 1, date: +s.date || 0};
+    }
+  }
+}
 let curTab = 'cards', score = 0, qi = 0, answer, locked = false, qEmoji, qList = [], pending = false, done = false;
 let best = Number.isInteger(store.best) ? store.best : 0;
 function persist(){
   try{
     localStorage.setItem(KEY, JSON.stringify({
-      cur, shapeIdx, muted, best, learned: [...studied],
+      cur, shapeIdx, muted, best, learned: [...studied], stats,
       game: {score, qi, answer, emoji: qEmoji, list: qList, pending, done}
     }));
   }catch(e){}
@@ -578,11 +633,12 @@ function applyMute(){
 $('mute').onclick = () => { muted = !muted; applyMute(); persist(); };
 if(muted) applyMute();
 
-/* الأقسام: بطاقات الأعداد، تعلّم رقم، العب مع الأعداد */
+/* الأقسام: بطاقات الأعداد، تعلّم رقم، العب مع الأعداد، إنجازاتي */
 function show(tab){
   curTab = tab;
-  ['cards', 'learn', 'play'].forEach(s => $(s).classList.toggle('hidden', s !== tab));
+  ['cards', 'learn', 'play', 'ach'].forEach(s => $(s).classList.toggle('hidden', s !== tab));
   if(tab === 'play' && (qi === 0 || done)) startGame();
+  if(tab === 'ach') renderAch();
   persist();
 }
 
@@ -606,6 +662,45 @@ function openLearn(n){
   history.pushState({v: 'sec', tab: 'learn', depth: 2}, '');
   show('learn');
   pick(n);
+}
+
+/* إنجازاتي: نسبة الأرقام المنجزة، ولكل رقم شريط بدرجته ونجومه */
+const starCount = s => s >= 5 ? 3 : s >= 3 ? 2 : s >= 1 ? 1 : 0;
+function renderAch(){
+  const doneN = studied.size, pct = Math.round(doneN / 11 * 100);
+  $('achDone').innerHTML = 'أنجزت <b>' + fmt(doneN) + '</b> من ' + fmt(11);
+  $('achPct').innerHTML = '<b>' + fmt(pct) + (digits === 'ar' ? '٪' : '%') + '</b>';
+  $('achBar').setAttribute('aria-valuenow', pct);
+  $('achFill').style.width = '0';
+  requestAnimationFrame(() => requestAnimationFrame(() => { $('achFill').style.width = pct + '%'; }));
+  const pts = Object.values(stats).reduce((a, s) => a + s.best, 0);
+  $('achPts').textContent = 'مجموع النقاط: ' + fmt(pts) + ' من ' + fmt(11 * MROUNDS) +
+    (best ? ' · أفضل نتيجة في اللعب: ' + fmt(best) + ' من ' + fmt(TOTAL) : '');
+  const list = $('achList');
+  list.innerHTML = '';
+  for(let n = 0; n <= 10; n++){
+    const s = stats[n], d = studied.has(n);
+    const b = document.createElement('button');
+    b.className = 'ach-row' + (d ? '' : ' todo');
+    b.style.setProperty('--b', PAL[n % PAL.length]);
+    const w = s ? s.best / MROUNDS * 100 : (d ? 100 : 0);
+    let scoreHtml, label;
+    if(s){
+      const st = starCount(s.best);
+      scoreHtml = '<b>' + fmt(s.best) + ' من ' + fmt(MROUNDS) + '</b>' + '<i class="on">★</i>'.repeat(st) + '<i>★</i>'.repeat(3 - st);
+      label = NAMES[n] + ': ' + s.best + ' من ' + MROUNDS;
+    }else if(d){
+      scoreHtml = '<b>✓</b>'; label = NAMES[n] + ': تم';
+    }else{
+      scoreHtml = 'لم يُختبَر'; label = NAMES[n] + ': لم يُختبَر';
+    }
+    b.innerHTML = '<span class="ach-n">' + fmtH(n) + '</span>' +
+      '<span class="ach-mid"><span class="ach-name">' + NAMES[n] + '</span><span class="pbar"><i style="width:' + w + '%"></i></span></span>' +
+      '<span class="ach-score">' + scoreHtml + '</span>';
+    b.setAttribute('aria-label', label);
+    b.onclick = () => openLearn(n);
+    list.appendChild(b);
+  }
 }
 
 /* تعلّم */
@@ -749,6 +844,7 @@ function applyDigits(mode, save){
   [...grid.children, ...cardGrid.children].forEach(b => b.innerHTML = fmtH(b.dataset.n));
   pick(cur, true);
   if(!$('ask').classList.contains('hidden')) $('askN').innerHTML = fmtH(cur);
+  if(curTab === 'ach') renderAch();
   if(qi){
     updateBar();
     [...$('choices').children].forEach(b => b.innerHTML = fmtH(b.dataset.n));
@@ -773,13 +869,13 @@ try{ saved = localStorage.getItem('digits') === 'en' ? 'en' : 'ar'; }catch(e){}
 })();
 applyDigits(saved);
 
-/* اختبار الرقم (زر ▶ أو «اختبر الآن»): اختر المجموعة التي فيها هذا العدد */
-const MROUNDS = 5;
-let mN = 0, mR = 0, mLock = false, mEmoji = [], mTimer = 0;
+/* اختبار الرقم (زر ▶ أو «اختبر الآن»): اختر المجموعة التي فيها هذا العدد.
+   الدرجة: عدد الجولات التي أجاب فيها صحيحًا من أول محاولة (من ٥) */
+let mN = 0, mR = 0, mLock = false, mEmoji = [], mTimer = 0, mFirst = 0, mMiss = false;
 function openMini(){
   clearTimeout(mTimer);   // إلغاء أي جولة مؤجلة من فتح سابق
   if(!(history.state && history.state.v === 'mini')) history.pushState({v: 'mini', tab: 'learn', depth: 3}, '');
-  mN = cur; mR = 0;
+  mN = cur; mR = 0; mFirst = 0;
   mEmoji = shuffle(SETS[mN].slice());   // شكل مختلف لكل جولة دون تكرار
   $('mNum').innerHTML = fmtH(mN);
   $('mResult').classList.add('hidden'); $('mRound').classList.remove('hidden');
@@ -796,7 +892,7 @@ function closeMini(){
 function nextMini(){
   if($('mini').classList.contains('hidden')) return;   // أُغلقت اللعبة قبل انتهاء المؤقت
   if(mR >= MROUNDS) return finishMini();
-  mR++; mLock = false;
+  mR++; mLock = false; mMiss = false;
   $('mCount').textContent = fmt(mR) + ' من ' + fmt(MROUNDS);
   $('mQ').textContent = mN === 0 ? 'أين المربع الفارغ؟' : 'أين المجموعة التي فيها ' + NAMES[mN] + '؟';
   $('mMsg').textContent = '';
@@ -812,11 +908,13 @@ function nextMini(){
     b.onclick = () => {
       if(mLock || b.disabled) return;
       if(c === mN){
-        mLock = true; b.classList.add('ok'); tone([523, 659, 784]);
+        mLock = true; if(!mMiss) mFirst++;
+        b.classList.add('ok'); tone([523, 659, 784]);
         $('mMsg').textContent = 'صحيح! ' + NAMES[mN];
         setTimeout(() => speak(mN), 500);
         mTimer = setTimeout(nextMini, 1500);
       }else{
+        mMiss = true;
         b.classList.add('no'); b.disabled = true; wrong();
         $('mMsg').textContent = 'حاول مرة أخرى';
       }
@@ -827,6 +925,11 @@ function nextMini(){
 function finishMini(){
   $('mRound').classList.add('hidden'); $('mResult').classList.remove('hidden');
   $('mCount').textContent = '';
+  const prev = stats[mN];
+  stats[mN] = {best: Math.max(prev ? prev.best : 0, mFirst), last: mFirst, tries: (prev ? prev.tries : 0) + 1, date: Date.now()};
+  const st = Math.max(1, starCount(mFirst));
+  $('mStars').textContent = '⭐'.repeat(st) + '☆'.repeat(3 - st);
+  $('mScore').textContent = 'درجتك ' + fmt(mFirst) + ' من ' + fmt(MROUNDS);
   studied.add(mN); updateNums(); persist();
   tone([523, 659, 784, 1047]);
   $('mAgain').focus();
@@ -860,12 +963,13 @@ function setHome(on){
 setHome(true);
 
 /* التنقل وزر الرجوع في الهاتف:
-   الرئيسية ← بطاقات الأعداد (depth 1) ← تعلّم رقم (depth 2) ← اختبار الرقم (depth 3)
+   الرئيسية ← بطاقات الأعداد أو إنجازاتي (depth 1) ← تعلّم رقم (depth 2) ← اختبار الرقم (depth 3)
    الرئيسية ← العب مع الأعداد (depth 1). الرجوع يعود خطوة واحدة، والشعار يعود للرئيسية مباشرة */
 if(history.state) history.replaceState(null, '');
 function enter(tab){ history.pushState({v: 'sec', tab, depth: 1}, ''); show(tab); setHome(false); }
 $('hb1').onclick = () => enter('cards');
 $('hb4').onclick = () => enter('play');
+$('hb5').onclick = () => enter('ach');
 $('homeBtn').onclick = () => {
   const d = history.state && history.state.depth;
   if(d) history.go(-d);
