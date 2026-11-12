@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>أعدادي اللطيفة – لعبة تعلّم الأرقام العربية</title>
-<meta name="description" content="لعبة تفاعلية لتعليم الأطفال الأرقام العربية ٠ – ١٠">
+<meta name="description" content="لعبة تفاعلية لتعليم الأطفال الأرقام العربية ٠ – ٥٠">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="أعدادي اللطيفة">
 <meta property="og:locale" content="ar_AR">
 <meta property="og:title" content="أعدادي اللطيفة – لعبة تعلّم الأرقام العربية">
-<meta property="og:description" content="لعبة ممتعة تعلّم الأطفال الأرقام العربية ٠ – ١٠ بالأشكال والأصوات.">
+<meta property="og:description" content="لعبة ممتعة تعلّم الأطفال الأرقام العربية ٠ – ٥٠ بالأشكال والأصوات.">
 <meta property="og:image" content="https://a3dady.vercel.app/img/og-image.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
@@ -17,7 +17,7 @@
 <meta property="og:image:alt" content="شعار لعبة أعدادي اللطيفة">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="أعدادي اللطيفة – لعبة تعلّم الأرقام العربية">
-<meta name="twitter:description" content="لعبة ممتعة تعلّم الأطفال الأرقام العربية ٠ – ١٠ بالأشكال والأصوات.">
+<meta name="twitter:description" content="لعبة ممتعة تعلّم الأطفال الأرقام العربية ٠ – ٥٠ بالأشكال والأصوات.">
 <meta name="twitter:image" content="https://a3dady.vercel.app/img/og-image.png">
 <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
@@ -102,7 +102,7 @@ body{
 
 main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 
-/* ===== بطاقات الأعداد: أول ما يظهر عند فتح «الأعداد» ===== */
+/* ===== بطاقات الأعداد: أول ما يظهر عند فتح قسم من أقسام الأعداد ===== */
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:6px 8px 12px}
 .card{
   position:relative;aspect-ratio:1;display:grid;place-items:center;cursor:pointer;
@@ -121,6 +121,10 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .card:active{transform:translateY(4px);box-shadow:0 0 0 var(--shadow)}
 .card.done::after{content:"";position:absolute;top:-10px;inset-inline-end:-8px;width:28px;height:28px;border-radius:50%;
   background:var(--check);border:2px solid var(--ink);box-shadow:0 2px 0 rgba(23,48,77,.35)}
+/* أقسام العشرات: خمس بطاقات في الصف بأرقام أصغر قليلًا */
+.cards[data-sec="1"],.cards[data-sec="2"]{grid-template-columns:repeat(5,1fr);gap:10px}
+.cards[data-sec="1"] .card,.cards[data-sec="2"] .card{font-size:clamp(1.7rem,8.5vw,2.8rem);border-radius:18px}
+.cards[data-sec="1"] .card.done::after,.cards[data-sec="2"] .card.done::after{width:22px;height:22px;top:-8px;inset-inline-end:-6px}
 
 /* ===== إنجازاتي: شريط التقدم العام ثم صف لكل رقم بدرجته ===== */
 .ach-top{background:rgba(255,255,255,.82);border-radius:22px;padding:14px 16px 14px;margin:0 4px 14px;box-shadow:0 6px 18px rgba(23,48,77,.12)}
@@ -132,6 +136,9 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .ach-top .pbar i{transition:width .8s ease}
 .ach-sub{margin-top:10px;font-size:.85rem;font-weight:800;opacity:.7;text-align:center;line-height:1.8}
 .ach-list{display:flex;flex-direction:column;gap:8px;padding:0 4px 8px}
+.ach-sec{display:flex;justify-content:space-between;align-items:baseline;margin:10px 6px 0;font-weight:800;font-size:1rem}
+.ach-sec:first-child{margin-top:0}
+.ach-sec span{font-size:.85rem;opacity:.65}
 .ach-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;width:100%;
   padding:8px 12px;border:0;border-radius:16px;background:rgba(255,255,255,.78);
   font:inherit;color:inherit;text-align:start;cursor:pointer;transition:transform .08s}
@@ -173,6 +180,9 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .c{width:calc(100% / var(--c));height:calc(90cqw / var(--c));display:grid;place-items:center;
   font-size:calc(90cqw / var(--c) * .8);line-height:1}
 .c img{width:88%;height:88%;object-fit:contain;pointer-events:none;-webkit-user-drag:none;user-select:none}
+/* الأعداد فوق العشرة: صفوف من عشرة (كل صف عشرة) ثم الآحاد في صف أخير يبدأ من اليمين */
+.tens .sg{justify-content:flex-start}
+.tens .c{height:calc(90cqw / var(--c) * 1.3)}
 
 /* ===== تعلّم: الرقم واسمه بجانب الأشكال، ومربعات الأرقام في الأسفل ===== */
 #learn{flex:1;display:flex;flex-direction:column}
@@ -180,6 +190,7 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .numhalf{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1cqw}
 .big{font-family:'Lalezar','Cairo',sans-serif;font-size:66cqw;line-height:1.05;color:var(--coral)}
 .split .word{font-size:17cqw;line-height:1.2}
+.split .word.long{font-size:11cqw}   /* الأسماء الطويلة مثل «ثمانية وأربعون» */
 /* ظهور لطيف للرقم عند التغيير، ورقصة هادئة بين الحين والآخر */
 #big{animation:bigDance 7s ease-in-out 2.5s infinite;transform-origin:50% 70%}
 #big .dn{display:inline-block;animation:bigPop .55s cubic-bezier(.2,1.5,.4,1) both}
@@ -201,9 +212,10 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .tab#miniBtn{background:linear-gradient(#5FDDB3,#2BB98F)}
 .tab#shapeBtn .ic,.tab#miniBtn .ic{margin:0;width:1.5em;height:1.5em}
 
-/* مربعات الأرقام: صغيرة ومتراصة على سطرين.
+/* مربعات الأرقام: صغيرة ومتراصة في أسفل صفحة التعلّم.
    غير المحدد باهت، والمحدد غير المكتمل أبيض، والمكتمل ملوّن وعليه علامة صح */
 .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:auto}
+.grid[data-sec="1"]{grid-template-columns:repeat(5,1fr)}
 .num{
   position:relative;cursor:pointer;
   font-family:'Lalezar','Cairo',sans-serif;font-size:1.5rem;line-height:1.5;
@@ -451,8 +463,8 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
   </div>
   <nav class="hmenu">
     <button class="btn hbtn h1b" id="hb1">الأعداد <span dir="ltr">(0 - 10)</span></button>
-    <button class="btn hbtn h2b" disabled>الأعداد <span dir="ltr">(11 - 20)</span></button>
-    <button class="btn hbtn h3b" disabled>الأعداد <span dir="ltr">(21 - 50)</span></button>
+    <button class="btn hbtn h2b" id="hb2">الأعداد <span dir="ltr">(11 - 20)</span></button>
+    <button class="btn hbtn h3b" id="hb3">الأعداد <span dir="ltr">(21 - 50)</span></button>
     <button class="btn hbtn h4b" id="hb4">العب مع الأعداد</button>
     <button class="btn hbtn h5b" id="hb5">إنجازاتي</button>
   </nav>
@@ -469,7 +481,7 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 </header>
 
 <main>
-  <!-- بطاقات الأعداد -->
+  <!-- بطاقات الأعداد (للقسم المفتوح) -->
   <section id="cards" class="hidden">
     <div class="cards" id="cardGrid"></div>
   </section>
@@ -512,7 +524,7 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
     </div>
     <div id="lock" class="stage result hidden"><svg class="frame" aria-hidden="true"><rect x="1.5" y="1.5" rx="22" ry="22"/></svg>
       <div class="word">تعلّم أولًا</div>
-      <div class="q">أكمل لعبة رقمين على الأقل بزر ▶ في صفحة الأعداد، ثم عُد لتلعب بهما</div>
+      <div class="q">أكمل اختبار رقمين على الأقل بزر ▶ في صفحة الأعداد، ثم عُد لتلعب بهما</div>
       <button class="btn" id="toLearn">إلى الأعداد</button>
     </div>
     <div id="result" class="stage result hidden"><svg class="frame" aria-hidden="true"><rect x="1.5" y="1.5" rx="22" ry="22"/></svg>
@@ -578,7 +590,20 @@ const AR = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
 let digits = 'ar';   // 'ar' = ٠١٢٣ ، 'en' = 0123
 const fmt = n => digits === 'ar' ? String(n).split('').map(d => AR[+d]).join('') : String(n);
 const fmtH = n => fmt(n);
-const NAMES = ['صفر','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة'];
+
+/* الأقسام: ٠–١٠، ١١–٢٠، ٢١–٥٠ */
+const MAXN = 50;
+const SECS = [{from: 0, to: 10, label: '(0 - 10)'}, {from: 11, to: 20, label: '(11 - 20)'}, {from: 21, to: 50, label: '(21 - 50)'}];
+const secOf = n => n <= 10 ? 0 : n <= 20 ? 1 : 2;
+const range = s => Array.from({length: SECS[s].to - SECS[s].from + 1}, (_, i) => SECS[s].from + i);
+
+/* أسماء الأعداد ٠–٥٠ */
+const BASE = ['صفر','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة'];
+const TEENS = ['أحد عشر','اثنا عشر','ثلاثة عشر','أربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'];
+const TENS = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون'];
+const NAMES = Array.from({length: MAXN + 1}, (_, n) =>
+  n <= 10 ? BASE[n] : n < 20 ? TEENS[n - 11] : n % 10 === 0 ? TENS[n / 10] : BASE[n % 10] + ' و' + TENS[Math.floor(n / 10)]);
+
 const PAL = ['#FF9FB0','#FFC27A','#FFE27A','#8FE3A8','#9CCBFF','#C9B3FF'];   // ألوان الأرقام بالترتيب
 /* عبارات التشجيع: العبارة رقم i ينطقها الملف audio/praise/(i+1).mp3 */
 const PRAISE = ['أحسنت', 'ممتاز', 'رائع', 'ما شاء الله', 'بارك الله فيك'];
@@ -586,7 +611,7 @@ const PRAISE = ['أحسنت', 'ممتاز', 'رائع', 'ما شاء الله', 
 const EMOJI = ['seed','faucet','watering-can','shower','tree','house','rocket','backpack','net','gift','comb','candle','frog','key','fish','brush'];
 EMOJI.forEach(id => { new Image().src = 'img/shapes/' + id + '.webp'; });
 /* لكل رقم خمسة أشكال مختلفة للتعبير عنه (الخطوة 3 أولية مع 16 فلا يتكرر شكل داخل المجموعة) */
-const SETS = Array.from({length:11}, (_, n) => Array.from({length:5}, (_, k) => EMOJI[(n*5 + k*3 + 1) % EMOJI.length]));
+const SETS = Array.from({length: MAXN + 1}, (_, n) => Array.from({length:5}, (_, k) => EMOJI[(n*5 + k*3 + 1) % EMOJI.length]));
 const $ = id => document.getElementById(id);
 /* خلط عادل (Fisher–Yates) حتى لا تميل الإجابة الصحيحة إلى موضع معيّن */
 const shuffle = a => { for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -595,17 +620,18 @@ const shuffle = a => { for(let i = a.length - 1; i > 0; i--){ const j = Math.flo
 const KEY = 'arabic-numbers-v1';
 let store = {};
 try{ store = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }catch(e){ store = {}; }
-const okIdx = a => Array.isArray(a) && a.length === 11 && a.every(v => Number.isInteger(v) && v >= 0 && v < 5);
-const shapeIdx = okIdx(store.shapeIdx) ? store.shapeIdx.slice() : Array(11).fill(0);
+const okNum = n => Number.isInteger(n) && n >= 0 && n <= MAXN;
+const shapeIdx = Array(MAXN + 1).fill(0);
+if(Array.isArray(store.shapeIdx)) store.shapeIdx.forEach((v, i) => { if(i <= MAXN && Number.isInteger(v) && v >= 0 && v < 5) shapeIdx[i] = v; });
 /* الأرقام التي أنهى الطفل اختبارها: لعبة «العب مع الأعداد» لا تتجاوزها */
-const studied = new Set(Array.isArray(store.learned) ? store.learned.filter(n => Number.isInteger(n) && n >= 0 && n <= 10) : []);
+const studied = new Set(Array.isArray(store.learned) ? store.learned.filter(okNum) : []);
 /* درجات اختبار كل رقم: best أفضل درجة (من ٥)، last آخر درجة، tries عدد مرات الاختبار، date آخر مرة */
 const MROUNDS = 5;
 const stats = {};
 if(store.stats && typeof store.stats === 'object'){
   for(const k in store.stats){
     const n = +k, s = store.stats[k];
-    if(Number.isInteger(n) && n >= 0 && n <= 10 && s && Number.isInteger(s.best) && s.best >= 0 && s.best <= MROUNDS){
+    if(okNum(n) && s && Number.isInteger(s.best) && s.best >= 0 && s.best <= MROUNDS){
       stats[n] = {best: s.best, last: Number.isInteger(s.last) ? s.last : s.best, tries: Number.isInteger(s.tries) ? s.tries : 1, date: +s.date || 0};
     }
   }
@@ -717,82 +743,96 @@ function show(tab){
   persist();
 }
 
-/* الأشكال: تُرتَّب في شبكة تملأ المربع بأكبر حجم ممكن */
+/* الأشكال: حتى العشرة تُرتَّب في شبكة تملأ المربع، وفوق العشرة في صفوف من عشرة ثم الآحاد */
 function renderShapes(el, id, n){
+  el.classList.toggle('tens', n > 10);
   if(n === 0){ el.innerHTML = ''; return; }
-  el.style.setProperty('--c', Math.ceil(Math.sqrt(n)));
+  el.style.setProperty('--c', n > 10 ? 10 : Math.ceil(Math.sqrt(n)));
   el.innerHTML = '<div class="sg">' + `<span class="c"><img src="img/shapes/${id}.webp" alt="" draggable="false"></span>`.repeat(n) + '</div>';
 }
 
-/* بطاقات الأعداد: الضغط على بطاقة يفتح صفحة تعلّم الرقم وينطقه */
-const cardGrid = $('cardGrid');
-for(let n=0;n<=10;n++){
-  const b = document.createElement('button');
-  b.className = 'card'; b.dataset.n = n; b.innerHTML = fmtH(n);
-  b.setAttribute('aria-label', NAMES[n]);
-  b.onclick = () => openLearn(n);
-  cardGrid.appendChild(b);
+/* بطاقات الأعداد ومربعات صفحة التعلّم تُبنى حسب القسم المفتوح */
+const cardGrid = $('cardGrid'), grid = $('grid');
+let curSec = 0, cur = 1;
+function setSection(s){
+  curSec = s;
+  cardGrid.innerHTML = ''; grid.innerHTML = '';
+  cardGrid.dataset.sec = s; grid.dataset.sec = s;
+  range(s).forEach(n => {
+    const c = document.createElement('button');
+    c.className = 'card'; c.dataset.n = n; c.innerHTML = fmtH(n);
+    c.onclick = () => openLearn(n);
+    cardGrid.appendChild(c);
+    const b = document.createElement('button');
+    b.className = 'num'; b.dataset.n = n; b.innerHTML = fmtH(n);
+    b.setAttribute('aria-pressed', n === cur);
+    b.onclick = () => requestPick(n);
+    grid.appendChild(b);
+  });
+  updateNums();
 }
+const numBtn = n => grid.querySelector('[data-n="' + n + '"]');
 function openLearn(n){
-  history.pushState({v: 'sec', tab: 'learn', depth: 2}, '');
+  const s = secOf(n);
+  if(s !== curSec) setSection(s);
+  history.pushState({v: 'sec', tab: 'learn', depth: 2, sec: s}, '');
   show('learn');
   pick(n);
 }
 
-/* إنجازاتي: نسبة الأرقام المنجزة، ولكل رقم شريط بدرجته ونجومه */
+/* إنجازاتي: نسبة الأرقام المنجزة، ولكل قسم عنوان، ولكل رقم شريط بدرجته ونجومه */
 const starCount = s => s >= 5 ? 3 : s >= 3 ? 2 : s >= 1 ? 1 : 0;
 function renderAch(){
-  const doneN = studied.size, pct = Math.round(doneN / 11 * 100);
-  $('achDone').innerHTML = 'أنجزت <b>' + fmt(doneN) + '</b> من ' + fmt(11);
+  const total = MAXN + 1, doneN = studied.size, pct = Math.round(doneN / total * 100);
+  $('achDone').innerHTML = 'أنجزت <b>' + fmt(doneN) + '</b> من ' + fmt(total);
   $('achPct').innerHTML = '<b>' + fmt(pct) + (digits === 'ar' ? '٪' : '%') + '</b>';
   $('achBar').setAttribute('aria-valuenow', pct);
   $('achFill').style.width = '0';
   requestAnimationFrame(() => requestAnimationFrame(() => { $('achFill').style.width = pct + '%'; }));
   const pts = Object.values(stats).reduce((a, s) => a + s.best, 0);
-  $('achPts').textContent = 'مجموع النقاط: ' + fmt(pts) + ' من ' + fmt(11 * MROUNDS) +
+  $('achPts').textContent = 'مجموع النقاط: ' + fmt(pts) + ' من ' + fmt(total * MROUNDS) +
     (best ? ' · أفضل نتيجة في اللعب: ' + fmt(best) + ' من ' + fmt(TOTAL) : '');
   const list = $('achList');
   list.innerHTML = '';
-  for(let n = 0; n <= 10; n++){
-    const s = stats[n], d = studied.has(n);
-    const b = document.createElement('button');
-    b.className = 'ach-row' + (d ? '' : ' todo');
-    b.style.setProperty('--b', PAL[n % PAL.length]);
-    const w = s ? s.best / MROUNDS * 100 : (d ? 100 : 0);
-    let scoreHtml, label;
-    if(s){
-      const st = starCount(s.best);
-      scoreHtml = '<b>' + fmt(s.best) + ' من ' + fmt(MROUNDS) + '</b>' + '<i class="on">★</i>'.repeat(st) + '<i>★</i>'.repeat(3 - st);
-      label = NAMES[n] + ': ' + s.best + ' من ' + MROUNDS;
-    }else if(d){
-      scoreHtml = '<b>✓</b>'; label = NAMES[n] + ': تم';
-    }else{
-      scoreHtml = 'لم يُختبَر'; label = NAMES[n] + ': لم يُختبَر';
-    }
-    b.innerHTML = '<span class="ach-n">' + fmtH(n) + '</span>' +
-      '<span class="ach-mid"><span class="ach-name">' + NAMES[n] + '</span><span class="pbar"><i style="width:' + w + '%"></i></span></span>' +
-      '<span class="ach-score">' + scoreHtml + '</span>';
-    b.setAttribute('aria-label', label);
-    b.onclick = () => openLearn(n);
-    list.appendChild(b);
-  }
+  SECS.forEach((sec, si) => {
+    const nums = range(si), d = nums.filter(n => studied.has(n)).length;
+    const h = document.createElement('div');
+    h.className = 'ach-sec';
+    h.innerHTML = 'الأعداد <span dir="ltr">' + sec.label + '</span><span>' + fmt(d) + ' من ' + fmt(nums.length) + '</span>';
+    list.appendChild(h);
+    nums.forEach((n, i) => {
+      const s = stats[n], dn = studied.has(n);
+      const b = document.createElement('button');
+      b.className = 'ach-row' + (dn ? '' : ' todo');
+      b.style.setProperty('--b', PAL[i % PAL.length]);
+      const w = s ? s.best / MROUNDS * 100 : (dn ? 100 : 0);
+      let scoreHtml, label;
+      if(s){
+        const st = starCount(s.best);
+        scoreHtml = '<b>' + fmt(s.best) + ' من ' + fmt(MROUNDS) + '</b>' + '<i class="on">★</i>'.repeat(st) + '<i>★</i>'.repeat(3 - st);
+        label = NAMES[n] + ': ' + s.best + ' من ' + MROUNDS;
+      }else if(dn){
+        scoreHtml = '<b>✓</b>'; label = NAMES[n] + ': تم';
+      }else{
+        scoreHtml = 'لم يُختبَر'; label = NAMES[n] + ': لم يُختبَر';
+      }
+      b.innerHTML = '<span class="ach-n">' + fmtH(n) + '</span>' +
+        '<span class="ach-mid"><span class="ach-name">' + NAMES[n] + '</span><span class="pbar"><i style="width:' + w + '%"></i></span></span>' +
+        '<span class="ach-score">' + scoreHtml + '</span>';
+      b.setAttribute('aria-label', label);
+      b.onclick = () => openLearn(n);
+      list.appendChild(b);
+    });
+  });
 }
 
 /* تعلّم */
-const grid = $('grid');
-for(let n=0;n<=10;n++){
-  const b = document.createElement('button');
-  b.className = 'num'; b.dataset.n = n; b.innerHTML = fmtH(n);
-  b.setAttribute('aria-label', NAMES[n]); b.setAttribute('aria-pressed', 'false');
-  b.onclick = () => requestPick(n);
-  grid.appendChild(b);
-}
-let cur = 1;
 function pick(n, quiet){
   cur = n;
-  [...grid.children].forEach((b,i)=>b.setAttribute('aria-pressed', i===n));
+  [...grid.children].forEach(b => b.setAttribute('aria-pressed', +b.dataset.n === n));
   $('big').innerHTML = '<span class="dn">' + fmtH(n) + '</span>';
   $('word').textContent = NAMES[n];
+  $('word').classList.toggle('long', NAMES[n].length > 7);
   renderShapes($('things'), SETS[n][shapeIdx[n]], n);
   updateShapeBtn();
   persist();
@@ -817,7 +857,9 @@ $('shapeBtn').onclick = () => {
   persist();
   speak(cur);
 };
-pick(Number.isInteger(store.cur) && store.cur >= 0 && store.cur <= 10 ? store.cur : 1, true);
+cur = okNum(store.cur) ? store.cur : 1;
+setSection(secOf(cur));
+pick(cur, true);
 
 /* نافذة: هل أتممت دراسة الرقم؟ */
 function showAsk(){
@@ -826,7 +868,7 @@ function showAsk(){
   $('askTest').focus();
 }
 function hideAsk(){ $('ask').classList.add('hidden'); }
-$('askClose').onclick = () => { hideAsk(); askTarget = null; $('grid').children[cur].focus(); };
+$('askClose').onclick = () => { hideAsk(); askTarget = null; const b = numBtn(cur); if(b) b.focus(); };
 $('ask').onclick = e => { if(e.target === $('ask')){ hideAsk(); askTarget = null; } };
 $('askTest').onclick = () => { hideAsk(); askTarget = null; openMini(); };
 /* «ليس الآن»: تخطي الاختبار والانتقال للرقم المختار */
@@ -859,9 +901,9 @@ function updateFinal(){
   $('final').textContent = 'حصلت على ' + fmt(score) + ' من ' + fmt(TOTAL);
   $('best').textContent = 'أفضل نتيجة: ' + fmt(best) + ' من ' + fmt(TOTAL);
 }
-/* أرقام اللعب: المدروسة فقط من ١ إلى ١٠ */
-const playPool = () => [...studied].filter(n => n >= 1 && n <= 10);
-/* يختار أقرب الأرقام المدروسة للرقم المطلوب ليكون التمييز بينها ممتعًا */
+/* أرقام اللعب: كل ما اختبره الطفل من ١ إلى ٥٠ */
+const playPool = () => [...studied].filter(n => n >= 1);
+/* يختار أقرب الأرقام للرقم المطلوب ليكون التمييز بينها ممتعًا */
 function pickOthers(pool, n, count){
   return pool.filter(k => k !== n)
     .map(k => ({k, w: Math.abs(k - n) + Math.random() * 2.5})).sort((a, b) => a.w - b.w).slice(0, count).map(o => o.k);
@@ -916,7 +958,7 @@ function finish(){
   tone([523, 659, 784, 1047]);
 }
 $('again').onclick = startGame;
-$('toLearn').onclick = () => { history.replaceState({v: 'sec', tab: 'cards', depth: 1}, ''); show('cards'); };
+$('toLearn').onclick = () => { setSection(0); history.replaceState({v: 'sec', tab: 'cards', depth: 1, sec: 0}, ''); show('cards'); };
 
 /* خيار شكل الأرقام */
 function applyDigits(mode, save){
@@ -944,7 +986,7 @@ try{ saved = localStorage.getItem('digits') === 'en' ? 'en' : 'ar'; }catch(e){}
   const g = store.game;
   if(!g || g.done || !Number.isInteger(g.qi) || g.qi < 1 || !Number.isInteger(g.score)) return;
   const valid = Number.isInteger(g.answer) && Array.isArray(g.list) && (g.list.length === 2 || g.list.length === 3) &&
-    g.list.every(n => Number.isInteger(n) && n >= 1 && n <= 10 && studied.has(n)) && g.list.includes(g.answer) && EMOJI.includes(g.emoji);
+    g.list.every(n => okNum(n) && n >= 1 && studied.has(n)) && g.list.includes(g.answer) && EMOJI.includes(g.emoji);
   if(!valid) return;
   score = g.score; qi = g.qi; answer = g.answer; pending = !!g.pending;
   if(pending) nextQ();
@@ -953,11 +995,11 @@ try{ saved = localStorage.getItem('digits') === 'en' ? 'en' : 'ar'; }catch(e){}
 applyDigits(saved);
 
 /* اختبار الرقم (زر ▶ أو «اختبر الآن»): اختر المجموعة التي فيها هذا العدد.
-   الدرجة: عدد الجولات التي أجاب فيها صحيحًا من أول محاولة (من ٥) */
+   البدائل أرقام قريبة من نفس القسم. الدرجة: عدد الجولات التي أجاب فيها صحيحًا من أول محاولة (من ٥) */
 let mN = 0, mR = 0, mLock = false, mEmoji = [], mTimer = 0, mFirst = 0, mMiss = false;
 function openMini(){
   clearTimeout(mTimer); stopCountdown();   // إلغاء أي جولة أو عدّ تنازلي مؤجّل من فتح سابق
-  if(!(history.state && history.state.v === 'mini')) history.pushState({v: 'mini', tab: 'learn', depth: 3}, '');
+  if(!(history.state && history.state.v === 'mini')) history.pushState({v: 'mini', tab: 'learn', depth: 3, sec: curSec}, '');
   mN = cur; mR = 0; mFirst = 0;
   mEmoji = shuffle(SETS[mN].slice());   // شكل مختلف لكل جولة دون تكرار
   $('mNum').innerHTML = fmtH(mN);
@@ -980,7 +1022,7 @@ function nextMini(){
   $('mQ').textContent = mN === 0 ? 'أين المربع الفارغ؟' : 'أين المجموعة التي فيها ' + NAMES[mN] + '؟';
   $('mMsg').textContent = '';
   /* ترتيب المربعات (ثلاثة متجاورة، أو اثنان وواحد تحتهما على الهاتف) تتولّاه CSS */
-  const list = shuffle([mN, ...pickOthers([...Array(11).keys()], mN, 2)]);
+  const list = shuffle([mN, ...pickOthers(range(secOf(mN)), mN, 2)]);
   const emoji = mEmoji[(mR - 1) % mEmoji.length];
   $('mCards').innerHTML = '';
   list.forEach(c => {
@@ -1013,7 +1055,7 @@ function finishMini(){
   const st = Math.max(1, starCount(mFirst));
   $('mStars').textContent = '⭐'.repeat(st) + '☆'.repeat(3 - st);
   $('mScore').textContent = 'درجتك ' + fmt(mFirst) + ' من ' + fmt(MROUNDS);
-  $('mNext').classList.toggle('hidden', mN >= 10);   // لا رقم بعد العشرة
+  $('mNext').classList.toggle('hidden', mN >= SECS[secOf(mN)].to);   // لا رقم تالٍ بعد آخر رقم في القسم
   $('mResult').classList.remove('hidden');
   studied.add(mN); updateNums(); persist();
   tone([523, 659, 784, 1047]);
@@ -1034,11 +1076,12 @@ function startCountdown(){
   }, 1000);
 }
 function stopCountdown(){ clearInterval(cdTimer); }
-/* بعد إغلاق الاختبار بالرجوع في السجل ننفّذ الخطوة التالية (البطاقات أو الرقم التالي) */
+/* بعد إغلاق الاختبار بالرجوع في السجل ننفّذ الخطوة التالية (بطاقات القسم أو الرقم التالي) */
 let afterPop = null;
 function toCards(){
   stopCountdown();
-  const goCards = () => { history.replaceState({v: 'sec', tab: 'cards', depth: 1}, ''); show('cards'); };
+  const s = secOf(mN);
+  const goCards = () => { if(curSec !== s) setSection(s); history.replaceState({v: 'sec', tab: 'cards', depth: 1, sec: s}, ''); show('cards'); };
   const d = history.state && history.state.v === 'mini' ? history.state.depth : 0;
   if(d >= 2){ afterPop = goCards; history.go(-(d - 1)); }
   else { $('mini').classList.add('hidden'); goCards(); }
@@ -1046,7 +1089,7 @@ function toCards(){
 function toNext(){
   stopCountdown();
   const n = mN + 1;
-  if(n > 10) return toCards();
+  if(n > SECS[secOf(mN)].to) return toCards();
   afterPop = () => pick(n);
   if(history.state && history.state.v === 'mini') history.back();
   else { $('mini').classList.add('hidden'); const f = afterPop; afterPop = null; f(); }
@@ -1059,7 +1102,6 @@ function updateNums(){
     b.setAttribute('aria-label', NAMES[n] + (d ? ' - تم' : ''));
   });
 }
-updateNums();
 $('miniBtn').onclick = openMini;
 $('mClose').onclick = closeMini;
 $('mAgain').onclick = openMini;
@@ -1080,11 +1122,15 @@ function setHome(on){
 setHome(true);
 
 /* التنقل وزر الرجوع في الهاتف:
-   الرئيسية ← بطاقات الأعداد أو إنجازاتي (depth 1) ← تعلّم رقم (depth 2) ← اختبار الرقم (depth 3)
-   الرئيسية ← العب مع الأعداد (depth 1). الرجوع يعود خطوة واحدة، والشعار يعود للرئيسية مباشرة */
+   الرئيسية ← بطاقات قسم أو إنجازاتي (depth 1) ← تعلّم رقم (depth 2) ← اختبار الرقم (depth 3)
+   الرئيسية ← العب مع الأعداد (depth 1). الرجوع يعود خطوة واحدة، والشعار يعود للرئيسية مباشرة.
+   كل حالة تحفظ رقم القسم (sec) حتى يعود الرجوع إلى بطاقات القسم الصحيح */
 if(history.state) history.replaceState(null, '');
-function enter(tab){ history.pushState({v: 'sec', tab, depth: 1}, ''); show(tab); setHome(false); }
-$('hb1').onclick = () => enter('cards');
+function enter(tab, sec){ history.pushState({v: 'sec', tab, depth: 1, sec}, ''); show(tab); setHome(false); }
+function openSec(s){ setSection(s); enter('cards', s); }
+$('hb1').onclick = () => openSec(0);
+$('hb2').onclick = () => openSec(1);
+$('hb3').onclick = () => openSec(2);
 $('hb4').onclick = () => enter('play');
 $('hb5').onclick = () => enter('ach');
 $('homeBtn').onclick = () => {
@@ -1101,10 +1147,11 @@ window.addEventListener('popstate', e => {
     $('miniBtn').focus();
   }
   if(st.v === 'mini' && $('mini').classList.contains('hidden')){
-    history.replaceState({v: 'sec', tab: 'learn', depth: st.depth}, '');   // تقدّم إلى اختبار مغلق: نبقى في صفحة التعلّم
+    history.replaceState({v: 'sec', tab: 'learn', depth: st.depth, sec: st.sec}, '');   // تقدّم إلى اختبار مغلق: نبقى في صفحة التعلّم
     st.v = 'sec';
   }
   if(st.v === 'sec' || st.v === 'mini'){
+    if(Number.isInteger(st.sec) && st.sec !== curSec && st.tab !== 'learn') setSection(st.sec);
     if(st.tab !== curTab || !$('home').classList.contains('hidden')) show(st.tab || 'cards');
     setHome(false);
   }else{
