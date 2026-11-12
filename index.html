@@ -180,9 +180,16 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .c{width:calc(100% / var(--c));height:calc(90cqw / var(--c));display:grid;place-items:center;
   font-size:calc(90cqw / var(--c) * .8);line-height:1}
 .c img{width:88%;height:88%;object-fit:contain;pointer-events:none;-webkit-user-drag:none;user-select:none}
-/* الأعداد فوق العشرة: صفوف من عشرة (كل صف عشرة) ثم الآحاد في صف أخير يبدأ من اليمين */
-.tens .sg{justify-content:flex-start}
-.tens .c{height:calc(90cqw / var(--c) * 1.3)}
+/* الأعداد فوق العشرة: كل عشرة بطاقة واحدة مكتوب عليها ١٠ (صف أعلى)، والآحاد أشكال كبيرة تحتها */
+.tg{width:90cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4cqw}
+.trow,.orow{display:flex;flex-wrap:wrap;justify-content:center;gap:2cqw;max-width:90cqw}
+.ten{width:16cqw;height:22cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6cqw;
+  background:linear-gradient(#FFE89A,#FFC83D);border:.6cqw solid var(--ink);border-radius:3.5cqw;box-shadow:0 .8cqw 0 rgba(23,48,77,.35)}
+.ten img{width:10cqw;height:10cqw;object-fit:contain}
+.ten b{font-family:'Lalezar','Cairo',sans-serif;font-weight:400;font-size:7.5cqw;line-height:1.2;color:var(--ink)}
+.one{width:16cqw;height:16cqw;display:grid;place-items:center}
+.one img{width:92%;height:92%;object-fit:contain}
+.ten img,.one img{pointer-events:none;-webkit-user-drag:none;user-select:none}
 
 /* ===== تعلّم: الرقم واسمه بجانب الأشكال، ومربعات الأرقام في الأسفل ===== */
 #learn{flex:1;display:flex;flex-direction:column}
@@ -743,12 +750,22 @@ function show(tab){
   persist();
 }
 
-/* الأشكال: حتى العشرة تُرتَّب في شبكة تملأ المربع، وفوق العشرة في صفوف من عشرة ثم الآحاد */
+/* الأشكال:
+   حتى العشرة تُرتَّب في شبكة تملأ المربع.
+   فوق العشرة: كل عشرة بطاقة واحدة عليها الشكل والرقم ١٠ في صف أعلى، والآحاد أشكال كبيرة تحتها */
 function renderShapes(el, id, n){
-  el.classList.toggle('tens', n > 10);
   if(n === 0){ el.innerHTML = ''; return; }
-  el.style.setProperty('--c', n > 10 ? 10 : Math.ceil(Math.sqrt(n)));
-  el.innerHTML = '<div class="sg">' + `<span class="c"><img src="img/shapes/${id}.webp" alt="" draggable="false"></span>`.repeat(n) + '</div>';
+  const img = `<img src="img/shapes/${id}.webp" alt="" draggable="false">`;
+  if(n <= 10){
+    el.style.setProperty('--c', Math.ceil(Math.sqrt(n)));
+    el.innerHTML = '<div class="sg">' + `<span class="c">${img}</span>`.repeat(n) + '</div>';
+    return;
+  }
+  const t = Math.floor(n / 10), o = n % 10;
+  el.innerHTML = '<div class="tg">' +
+    '<div class="trow">' + `<span class="ten">${img}<b>${fmt(10)}</b></span>`.repeat(t) + '</div>' +
+    (o ? '<div class="orow">' + `<span class="one">${img}</span>`.repeat(o) + '</div>' : '') +
+    '</div>';
 }
 
 /* بطاقات الأعداد ومربعات صفحة التعلّم تُبنى حسب القسم المفتوح */
@@ -972,6 +989,7 @@ function applyDigits(mode, save){
   if(curTab === 'ach') renderAch();
   if(qi){
     updateBar();
+    if(Number.isInteger(answer) && qEmoji) renderShapes($('qthings'), qEmoji, answer);   // بطاقات ١٠ تتبع شكل الأرقام
     [...$('choices').children].forEach(b => b.innerHTML = fmtH(b.dataset.n));
     if(!$('result').classList.contains('hidden')) updateFinal();
   }
