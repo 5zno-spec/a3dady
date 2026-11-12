@@ -201,6 +201,15 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
 .big{font-family:'Lalezar','Cairo',sans-serif;font-size:66cqw;line-height:1.05;color:var(--coral)}
 .split .word{font-size:17cqw;line-height:1.2}
 .split .word.long{font-size:11cqw}   /* الأسماء الطويلة مثل «ثمانية وأربعون» */
+/* على الهاتف: مربع الأشكال في الأعلى بعرض الشاشة، والرقم واسمه تحته بعرض الشاشة */
+@media (max-width:600px){
+  .split{grid-template-columns:1fr}
+  .split .shapes{order:-1}
+  .split .numhalf{aspect-ratio:auto;container-type:inline-size;padding:1cqw 0 2cqw}
+  .split .big{font-size:34cqw}
+  .split .word{font-size:9cqw}
+  .split .word.long{font-size:7cqw}
+}
 /* ظهور لطيف للرقم عند التغيير، ورقصة هادئة بين الحين والآخر */
 #big{animation:bigDance 7s ease-in-out 2.5s infinite;transform-origin:50% 70%}
 #big .dn{display:inline-block;animation:bigPop .55s cubic-bezier(.2,1.5,.4,1) both}
