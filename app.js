@@ -326,16 +326,14 @@ function requestPick(n){
   if(n !== cur && !studied.has(cur)){ askTarget = n; return showAsk(); }
   pick(n);
 }
-function updateShapeBtn(){
-  const b = $('shapeBtn');
-  b.style.visibility = cur === 0 ? 'hidden' : 'visible';
-}
-$('shapeBtn').onclick = () => {
-  if(cur === 0) return;
-  shapeIdx[cur] = (shapeIdx[cur] + 1) % 5;
-  renderShapes($('things'), SETS[cur][shapeIdx[cur]], cur);
-  updateShapeBtn();
-  persist();
+/* زر التشغيل ▶ تحت اللوحة: ينطق الرقم ويغيّر شكل الأشياء في كل ضغطة (الصفر بلا أشكال فيُنطق فقط) */
+function updateShapeBtn(){}
+$('speakBtn').onclick = () => {
+  if(cur > 0){
+    shapeIdx[cur] = (shapeIdx[cur] + 1) % 5;
+    renderShapes($('things'), SETS[cur][shapeIdx[cur]], cur);
+    persist();
+  }
   speak(cur);
 };
 cur = okNum(store.cur) ? store.cur : 1;
@@ -476,7 +474,7 @@ try{ saved = localStorage.getItem('digits') === 'en' ? 'en' : 'ar'; }catch(e){}
 })();
 applyDigits(saved);
 
-/* اختبار الرقم (زر ▶ أو «اختبر الآن»): اختر المجموعة التي فيها هذا العدد.
+/* اختبار الرقم (زر ✎ أو «اختبر الآن»): اختر المجموعة التي فيها هذا العدد.
    البدائل أرقام قريبة من نفس القسم. الدرجة: عدد الجولات التي أجاب فيها صحيحًا من أول محاولة (من ٥).
    الاجتياز من ٤ فأكثر: يُحسب الرقم منجزًا ويمكن الانتقال للتالي والإعادة اختيارية.
    أقل من ٤: لا انتقال، ويُطلب من الطفل إعادة الاختبار (أو الإغلاق بعلامة ✕) */
