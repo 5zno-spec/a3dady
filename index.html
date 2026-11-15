@@ -82,7 +82,7 @@
     <div class="ach-list" id="achList"></div>
   </section>
 
-  <!-- تعلّم -->
+  <!-- تعلّم: تحت اللوحة أزرار الاستماع ▶ والاختبار ✎ وتغيير الشكل -->
   <section id="learn" class="hidden">
     <div class="stage split" aria-live="polite">
       <svg class="frame" aria-hidden="true"><rect x="1.5" y="1.5" rx="22" ry="22"/></svg>
@@ -92,7 +92,7 @@
       </div>
       <div class="half shapes" id="things" aria-hidden="true"></div>
     </div>
-    <div class="shape-row"><button class="tab" id="shapeBtn" aria-label="شكل آخر"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M26 13a10 10 0 0 0-18-3.5M6 5.5v4.5h4.5M6 19a10 10 0 0 0 18 3.5M26 26.5V22h-4.5"/></svg></button><button class="tab" id="miniBtn" aria-label="العب بهذا الرقم"><svg class="ic" viewBox="0 0 32 32" fill="currentColor" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M11 7.5v17l14-8.5z"/></svg></button></div>
+    <div class="shape-row"><button class="tab" id="speakBtn" aria-label="استمع للرقم" onclick="speak(cur)"><svg class="ic" viewBox="0 0 32 32" fill="currentColor" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M11 7.5v17l14-8.5z"/></svg></button><button class="tab" id="miniBtn" aria-label="اختبر هذا الرقم"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 5.5l5.5 5.5L12 25.5l-6.5 1 1-6.5z"/><path d="M18 8.5l5.5 5.5"/><path d="M15.5 26.5H26"/></svg></button><button class="tab" id="shapeBtn" aria-label="شكل آخر"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M26 13a10 10 0 0 0-18-3.5M6 5.5v4.5h4.5M6 19a10 10 0 0 0 18 3.5M26 26.5V22h-4.5"/></svg></button></div>
     <div class="grid" id="grid"></div>
   </section>
 
@@ -109,7 +109,7 @@
     </div>
     <div id="lock" class="stage result hidden"><svg class="frame" aria-hidden="true"><rect x="1.5" y="1.5" rx="22" ry="22"/></svg>
       <div class="word">تعلّم أولًا</div>
-      <div class="q">أكمل اختبار رقمين على الأقل بزر ▶ في صفحة الأعداد، ثم عُد لتلعب بهما</div>
+      <div class="q">أكمل اختبار رقمين على الأقل بزر الاختبار ✎ في صفحة الأعداد، ثم عُد لتلعب بهما</div>
       <button class="btn" id="toLearn">إلى الأعداد</button>
     </div>
     <div id="result" class="stage result hidden"><svg class="frame" aria-hidden="true"><rect x="1.5" y="1.5" rx="22" ry="22"/></svg>
@@ -156,7 +156,7 @@
   <div class="ask-card">
     <button class="tab" id="askClose" aria-label="إغلاق"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M9 9l14 14M23 9L9 23"/></svg></button>
     <div class="ask-q" id="askQ">هل أتممت دراسة الرقم <b id="askN"></b>؟</div>
-    <button class="tab" id="askTest"><svg class="ic" viewBox="0 0 32 32" fill="currentColor" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M11 7.5v17l14-8.5z"/></svg>اختبر الآن</button>
+    <button class="tab" id="askTest"><svg class="ic" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 5.5l5.5 5.5L12 25.5l-6.5 1 1-6.5z"/><path d="M18 8.5l5.5 5.5"/><path d="M15.5 26.5H26"/></svg>اختبر الآن</button>
     <button class="tab" id="askSkip">ليس الآن</button>
   </div>
 </div>
