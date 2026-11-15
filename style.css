@@ -210,12 +210,13 @@ main{width:100%;max-width:560px;flex:1;display:flex;flex-direction:column}
   94%{transform:none}
 }
 
-/* زرا تغيير الشكل والعب بهذا الرقم */
 .shape-row{display:flex;justify-content:center;gap:10px;margin:-8px 0 18px}
-.tab#shapeBtn,.tab#miniBtn{color:#fff;padding:8px 18px}
+/* أزرار صفحة التعلّم: الاستماع ▶ (أزرق)، الاختبار ✎ (أخضر)، تغيير الشكل (مرجاني) */
+.tab#speakBtn,.tab#shapeBtn,.tab#miniBtn{color:#fff;padding:8px 18px}
+.tab#speakBtn{background:linear-gradient(#9CCBFF,#5B9BF0)}
 .tab#shapeBtn{background:linear-gradient(#FF8A7E,var(--coral))}
 .tab#miniBtn{background:linear-gradient(#5FDDB3,#2BB98F)}
-.tab#shapeBtn .ic,.tab#miniBtn .ic{margin:0;width:1.5em;height:1.5em}
+.tab#speakBtn .ic,.tab#shapeBtn .ic,.tab#miniBtn .ic{margin:0;width:1.5em;height:1.5em}
 
 /* مربعات الأرقام: صغيرة ومتراصة في أسفل صفحة التعلّم.
    غير المحدد باهت، والمحدد غير المكتمل أبيض، والمكتمل ملوّن وعليه علامة صح */
